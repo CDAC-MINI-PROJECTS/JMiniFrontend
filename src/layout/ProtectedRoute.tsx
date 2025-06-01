@@ -7,11 +7,13 @@ interface ProtectedRouteProps {
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   // Check if user is authenticated
-  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+  
+  const isAuthenticated = !!localStorage.getItem("isAuthenticated");
+  console.log('isAuthenticated', isAuthenticated);
 
-  if (isAuthenticated) {
+  if (!isAuthenticated) {
     // Redirect to login if not authenticated
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/sign-in" replace />;
   }
 
   return <>{children}</>;
