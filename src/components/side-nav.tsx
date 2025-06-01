@@ -22,10 +22,10 @@ export default function SideNav({ user_id, username, name, profile, verified }) 
   const navItems = [
     { icon: Home, label: 'Home', href: '/' },
     { icon: Compass, label: 'Explore', href: '/explore' },
-    { icon: Bell, label: 'Notifications', href: '/notifications' },
+    // { icon: Bell, label: 'Notifications', href: '/notifications' },
     { icon: CircleUser, label: 'Profile', href: `/${username}` },
-    ...(localStorage.getItem('bookmarks') === "true" ? [] : [{ icon: Bookmark, label: 'Bookmarks', href: '/bookmarks' }]),
-    ...(localStorage.getItem('settings') === "true" ? [] : [{ icon: Settings, label: 'Settings', href: '/settings' }]),
+    // ...(localStorage.getItem('bookmarks') === "true" ? [] : [{ icon: Bookmark, label: 'Bookmarks', href: '/bookmarks' }]),
+    // ...(localStorage.getItem('settings') === "true" ? [] : [{ icon: Settings, label: 'Settings', href: '/settings' }]),
   ]
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });

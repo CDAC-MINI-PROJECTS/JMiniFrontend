@@ -9,6 +9,7 @@ import Profile from "./pages/profile";
 import Settings from "./components/settings";
 import ProtectedRoute from "./layout/ProtectedRoute";
 import { useUser } from "./context/UserContext";
+import AdminPanel from "./pages/admin-panel";
 
 function App() {
   const user = useUser(); 
@@ -21,6 +22,12 @@ function App() {
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/sign-up" element={<SignUp />} />
         </Route>
+      
+      {/* Private only for admin role */}
+      <Route>
+         <Route path="/admin" element={<AdminPanel/>}/>
+      </Route>
+
 
         {/* private routes */}
         <Route>
