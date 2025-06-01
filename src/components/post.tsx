@@ -17,6 +17,7 @@ import { useToast } from '@/components/ui/use-toast'
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { useUser } from '@/context/UserContext'
 
 interface PostProps {
   currentUserID: string
@@ -53,6 +54,9 @@ interface PostProps {
 
 export default function Post({ currentUserID, currentUsername, id, user_id, name, username, profile, isVerified = false, timestamp, caption, type, files, location, hashtags, tagged_people, likes, comments, reposts, repost_user_data=null, tagged_user_data=null }: PostProps) {
   const userID = currentUserID;
+  const { user: currentUser }:{user:any}  =useUser();
+
+  // const user = currentUser.body
   const { toast } = useToast()
   const [isLiked, setIsLiked] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -132,8 +136,7 @@ export default function Post({ currentUserID, currentUsername, id, user_id, name
 
   useEffect(() => {
     // Subscribe to real-time updates for this post's comments
-  
-  }, [id]);
+  }, []);
 
   const handleShowComments = async () => {
     setIsCommentDrawerOpen(true);
@@ -174,6 +177,7 @@ export default function Post({ currentUserID, currentUsername, id, user_id, name
     }
   };
 
+
   const handleShowReposts = async () => {
     if (!reposts || reposts.length === 0) return;
     
@@ -193,27 +197,6 @@ export default function Post({ currentUserID, currentUsername, id, user_id, name
   };
 
   const handleRepost = async () => {
-    if (!userID) return;
-
-    try {
-      const currentReposts = reposts || [];
-      const updatedReposts = isReposted
-        ? currentReposts.filter(uid => uid !== userID)
-        : [...new Set([userID, ...currentReposts])];
-
-      // Update post's reposts
-
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error updating repost",
-        description: "Please try again later.",
-        duration: 3000
-      });
-    }
-
-    // Send notification
-  
   };
 
   const deletePost = async () => {
@@ -227,12 +210,9 @@ export default function Post({ currentUserID, currentUsername, id, user_id, name
   //   setIsReposted(reposts?.length === 0 ? false : reposts?.includes(userID));
   // }, []);
 
-  
   // Add this function with other handlers
   const handleBookmark = async () => {
   };
-
-
   const follow = async () => {
   }
 
@@ -312,8 +292,8 @@ export default function Post({ currentUserID, currentUsername, id, user_id, name
           </div>
         </CardHeader>
         <CardContent>
-          <p className="mb-2 whitespace-pre-wrap">{formatCaption(caption)}</p>
-          {files.length > 1 && type === "post" && (
+          <p className="mb-2 whitespace-pre-wrap">{caption+ "ss"}</p>
+          {files?.length > 1 && type === "post" && (
             <PhotoProvider>
               <ScrollArea className="w-full whitespace-nowrap rounded-md">
                 <div className="flex w-max space-x-4 py-4">
@@ -338,7 +318,7 @@ export default function Post({ currentUserID, currentUsername, id, user_id, name
               </ScrollArea>
             </PhotoProvider>
           )}
-          {files.length === 1 && type === "post" && (
+          {files?.length === 1 && type === "post" && (
             <AspectRatio ratio={16 / 9}>
               <iframe 
                 src={`${files[0]}`}
@@ -346,37 +326,6 @@ export default function Post({ currentUserID, currentUsername, id, user_id, name
                 allowFullScreen 
                 className="w-full h-full rounded-md"
               />
-            </AspectRatio>
-          )}
-          {files && type === "carousel" && (
-            <PhotoProvider>
-              <div className="group relative">
-                <Carousel className="w-full">
-                  <CarouselContent>
-                    {files.map((file, index) => (
-                      <CarouselItem key={index}>
-                        <PhotoView src={file}>
-                          <div className="relative aspect-square">
-                            <img
-                              src={file}
-                              alt={`Media ${index + 1}`}
-                              className="absolute inset-0 h-full w-full object-cover rounded-md"
-                              onError={(e) => {
-                                e.currentTarget.src = "https://placehold.co/600x600/020617/FFFFFF?text=Click+to+view+the+file";
-                              }}
-                            />
-                          </div>
-                        </PhotoView>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                </Carousel>
-              </div>
-            </PhotoProvider>
-          )}
-          {files && type === "reel" && (
-            <AspectRatio ratio={9 / 16}>
-              <iframe src={`${files[0]}`} allow="autoplay; fullscreen" allowFullScreen className="object-cover w-full h-full"></iframe>
             </AspectRatio>
           )}
         </CardContent>
@@ -530,7 +479,7 @@ export default function Post({ currentUserID, currentUsername, id, user_id, name
                         <Link to={`/${user.username}`}>
                           <Avatar>
                             <AvatarImage src={user.profile} alt={user.name} className="object-cover"/>
-                            <AvatarFallback>Fr</AvatarFallback>
+                            <AvatarFallback>MM</AvatarFallback>
                           </Avatar>
                         </Link>
                         <div className="flex-1">
@@ -610,7 +559,7 @@ export default function Post({ currentUserID, currentUsername, id, user_id, name
                               </span>
                             </div>
                             <p className="text-md mt-1 whitespace-pre-wrap break-words">
-                              {formatCaption(comment.content)}
+                              {/* {formatCaption(comment.content)} */}
                             </p>
                           </div>
                         </div>

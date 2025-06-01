@@ -12,6 +12,7 @@ import Post from '../components/post'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button";
+import API from "@/lib/api";
 const postsMock = Array.from({ length: 10 }, (_, i) => ({
   $id: `post-${i + 1}`,
   $createdAt: new Date(Date.now() - i * 3600000).toISOString(), // i hours ago
@@ -36,7 +37,7 @@ export default function Explore() {
   const [name, setName] = useState("");
   const [profile, setProfile] = useState("");
   const [verified, setVerified] = useState(false);
-  const [posts, setPosts] = useState(postsMock);
+  const [posts, setPosts] = useState([]);
   const [postUserDetails, setPostUserDetails] = useState([]);
   const [lastPostId, setLastPostId] = useState(null);
   //const [showTabs, setShowTabs] = useState(false);
@@ -85,8 +86,11 @@ export default function Explore() {
   }, []);
 
   const fetchData = async(isUpdate = false) => {
-   
+       const response  = await API.get('/dreams');
+console.log('ss', response.data)
+       setPosts(response.data || []);
   }
+console.log('post', posts)
 
   if (isLoading) {
     return (
@@ -161,7 +165,7 @@ export default function Explore() {
                       profile={postUserDetails[post.$id]?.profile} 
                       isVerified={postUserDetails[post.$id]?.verified} 
                       timestamp={post.$createdAt} 
-                      caption={post.caption} 
+                      caption={post.content} 
                       type={post.type} 
                       files={post.files} 
                       location={post.location} 

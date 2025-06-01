@@ -14,6 +14,8 @@ import { Label } from "@/components/ui/label";
 import { FaGoogleDrive } from "react-icons/fa";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { MapPin, Hash, Users, SquarePen, Image, BadgeCheck, Clapperboard, GalleryVertical, Info } from 'lucide-react';
+import API from '@/lib/api';
+import { useUser } from '@/context/UserContext';
 
 interface PostDialogueProps {
   user_id: string,
@@ -34,7 +36,8 @@ export default function PostDrawer({ user_id, username, name, profile, verified 
   const [location, setLocation] = useState("");
   const [tag, setTag] = useState("");
   const [people, setPeople] = useState("");
-
+  
+  const {user}:{user:any} = useUser(); 
   useEffect(() => {
     if (isPostDrawerOpen) {
       if (Cookies.get("access_token")) {
@@ -218,10 +221,42 @@ export default function PostDrawer({ user_id, username, name, profile, verified 
     }
   };
 
-    const handlePost = async () => {
-    }
-      
+  const handlePost = async () => {    
+    const response = await API.post('/dreams', {
+       content: caption,
+       tags: tag,
+       visibility: 'public',
+       user_id: user.body.userId
 
+    });
+    if (response.status === 200) {
+      toast({
+        title: "Post created successfully",
+        description: "Your post has been created.",
+        duration: 3000
+      });
+      setPostDrawerOpen(false);
+      setCaption("");
+      setLocation("");
+      setTag("");
+      setPeople("");
+      setFiles([]);
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Failed to create post",
+        description: response.data.message || "An error occurred while creating the post.",
+        duration: 3000
+      });
+    }
+  }
+    
+
+  useEffect(() => {
+    console.log("PostDrawer mounted", 
+caption,people, location,tag
+    );
+  }, [caption, location, tag, people]);
 
   const handleCaption = (e) => {
     setCaption(e.target.value);
