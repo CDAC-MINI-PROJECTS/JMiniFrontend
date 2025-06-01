@@ -1,5 +1,7 @@
 import axios from "axios";
 
+axios.defaults.withCredentials = true;
+
 const API = axios.create({
   baseURL: "http://localhost:8080/api", // Your backend base URL
 });
@@ -21,10 +23,12 @@ API.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
+
+      // console.log(error)
       // Optional: Auto-logout on token expiry
       localStorage.removeItem("token");
       localStorage.removeItem("role");
-      window.location.href = "/login";
+      window.location.href = "/sign-in";
     }
     return Promise.reject(error);
   }

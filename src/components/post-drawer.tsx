@@ -284,26 +284,26 @@ export default function PostDrawer({ user_id, username, name, profile, verified 
           <div className="p-4 pb-0">
             <div className="flex items-center justify-center space-x-2">
               <Tabs defaultValue="post" className="w-full" onValueChange={(value) => setActiveTab(value)}>
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-6 flex justify-center">
                   <TabsTrigger value="post" className='gap-2'>
-                    <GalleryVertical className='h-4 w-4'></GalleryVertical>
+                    <GalleryVertical className='h-4 w-[2rem]'></GalleryVertical>
                     <span className='hidden md:block'>Post</span>
                   </TabsTrigger>
-                  <TabsTrigger value="carousel" className='gap-2'>
+                  {/* <TabsTrigger value="carousel" className='gap-2'>
                     <Image className='h-4 w-4'></Image>
                     <span className='hidden md:block'>Carousel</span>
                   </TabsTrigger>
                   <TabsTrigger value="reel" className='gap-2'>
                     <Clapperboard className='h-4 w-4'></Clapperboard>
                     <span className='hidden md:block'>Reel</span>
-                  </TabsTrigger>
+                  </TabsTrigger> */}
                 </TabsList>
                 <TabsContent value="post">
                   <div className="flex items-start justify-between mt-4 mb-2">
                     <div className="flex items-start space-x-4">
                       <Avatar>
-                        <AvatarImage src={profile} alt="Fr" className='object-cover object-center'/>
-                        <AvatarFallback>Fr</AvatarFallback>
+                        <AvatarImage src={profile} alt="MM" className='object-cover object-center'/>
+                        <AvatarFallback>MM</AvatarFallback>
                       </Avatar> 
                       <div>
                         <div className="flex items-center">

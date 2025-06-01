@@ -26,6 +26,7 @@ import 'react-photo-view/dist/react-photo-view.css';
 import RootLayout from "./layout";
 import { FaGoogleDrive } from "react-icons/fa";
 import NotFoundError from './404';
+import API from "@/lib/api";
 
 export default function AccountProfile() {
   const { toast } = useToast()
@@ -77,6 +78,7 @@ export default function AccountProfile() {
   useEffect(() => {
     const loadData = async () => {
       try {
+
         setIsLoading(true);
         setIsPostsLoading(true);
         setIsBtnLoading(true);
@@ -116,7 +118,12 @@ export default function AccountProfile() {
   }, [followers, currentUserID]);
 
   const fetchData = async() => {
-    
+    try {
+      setIsLoading(true);
+      const response = API.get('/users/') 
+    } catch (error) {
+
+    }
   }
 
   const verifyUser = async () => {

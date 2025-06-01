@@ -12,7 +12,6 @@ import { useScrollDirection } from '@/hooks/useScrollDirection';
 import { useNavigate } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-
 interface HeaderInfo {
   activeTab: string,
   username: string,
@@ -77,7 +76,7 @@ export default function Header({ activeTab="followings", username, name, profile
           </div>
           ) : (
             <div className='flex items-center lg:hidden'>
-              <img src="/logo.png" alt="DreamsDoc Logo" width={24} height={24} />
+              {/* <img src="/logo.png" alt="DreamsDoc Logo" width={24} height={24} /> */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="link" className="ring-0 border-0 focus-visible:ring-offset-0 focus-visible:ring-0 text-foreground">
@@ -170,7 +169,7 @@ export default function Header({ activeTab="followings", username, name, profile
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 mt-2 translate-x-[232%] translate-y-[20%]" align="end">
+                <DropdownMenuContent className="w-56 mt-2" align="end">
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
                       <div className='flex items-center'>
@@ -292,7 +291,7 @@ export default function Header({ activeTab="followings", username, name, profile
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 mt-[30rem]" >
+            <DropdownMenuContent className="w-56 mt-[30rem]" >
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <div className="flex items-center">

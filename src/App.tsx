@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, useContext } from "react";
 import { Routes, Route } from "react-router-dom";
 import SignIn from "./components/auth/SignIn";
 import SignUp from "./components/auth/SignUp";
@@ -8,8 +8,11 @@ import PostViewer from "./pages/post-viewer";
 import Profile from "./pages/profile";
 import Settings from "./components/settings";
 import ProtectedRoute from "./layout/ProtectedRoute";
+import { useUser } from "./context/UserContext";
 
 function App() {
+  const user = useUser(); 
+  console.log("App component rendered", user);
   return (
     <Suspense fallback={<p>Loading...</p>}>
       <Routes>

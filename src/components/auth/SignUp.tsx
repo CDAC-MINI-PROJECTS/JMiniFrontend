@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { SignupVal } from "@/lib/validation";
 import { Link } from "react-router-dom";
+import API from "@/lib/api";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ const SignUp = () => {
       username: "",
       email: "",
       password: "",
+      role: "ROLE_USER"
     },
   });
 
@@ -32,6 +34,21 @@ const SignUp = () => {
       setIsDisabled(true);
       if (buttonRef.current) {
         buttonRef.current.innerHTML = `Signing Up...`;
+      }
+
+      console.log("User data:", user);
+      const newUser = {
+        first_name: user.name,
+        username: user.username,
+        email: user.email,
+        password: user.password,
+        role: user.role
+      }
+      const result = await API.post('/auth/register', newUser);
+
+      if (result) {
+        console.log("User signed up:", user);
+        navigate("/sign-in");
       }
       
     } catch (error:any) {

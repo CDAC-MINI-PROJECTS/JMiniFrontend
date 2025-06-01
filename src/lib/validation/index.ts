@@ -8,9 +8,10 @@ export const SignupVal = z.object({
   .regex(/^[a-zA-Z0-9._-]+$/, { message: "Username can only contain letters, numbers, underscores, dashes, periods, and no spaces." }),
   email: z.string().email(),
   password: z.string().min(8, { message: "Password must be at least 8 characters." }).max(20, { message: "Password must be less than 20 characters." }),
+  role: z.enum(["ROLE_USER", "ROLE_ADMIN"], { message: "Role must be either 'user' or 'admin'." }),
 });
 
 export const SigninVal = z.object({
-  id: z.string(),
+  username: z.string(),
   password: z.string().min(8, { message: "Password must be at least 8 characters." }).max(20, { message: "Password must be less than 20 characters." }),
 });

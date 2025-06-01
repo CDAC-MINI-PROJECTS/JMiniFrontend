@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { SigninVal } from "@/lib/validation";
 import { Link } from "react-router-dom";
+import  API from "@/lib/api";
 
 const SignIn = () => {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ const SignIn = () => {
   const form = useForm<z.infer<typeof SigninVal>>({
     resolver: zodResolver(SigninVal),
     defaultValues: {
-      id: "",
+      username: "",
       password: "",
     },
   });
@@ -30,14 +31,17 @@ const SignIn = () => {
     if (buttonRef.current) {
       (buttonRef.current as HTMLButtonElement).disabled = true;
     }
-
+    
     try {
-      // const response = await loginUserAccount(user.id, user.password);
-      // if (response) {
-      //   navigate("/dashboard");
-      // }
+      const response = await API.post('/auth/login',user);
+      localStorage.setItem("token", response.data.token);
+      
+      if (response) {
+        navigate("/");
+        localStorage.setItem("isAuthenticated", "true");
+      }
       console.log("User signed in:", user);
-      navigate("/dashboard");
+      // navigate("/dashboard");
     } catch (error: any) {
       setValError(error.message || "An error occurred during sign in.");
       console.error("Sign in error:", error);
@@ -73,11 +77,11 @@ const SignIn = () => {
             <form onSubmit={form.handleSubmit(handleSignIn)} className="space-y-4">
 
               <div className="space-y-2">
-                <FormField control={form.control} name="id" render={({ field }) => (
+                <FormField control={form.control} name="username" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="shad-form_label">Username (or) Email</FormLabel>
+                    <FormLabel className="shad-form_label">Username</FormLabel>
                     <FormControl>
-                      <Input type="text" className="text-md" placeholder="name@example.com" {...field} />
+                      <Input type="text" className="text-md" placeholder="name@example" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
