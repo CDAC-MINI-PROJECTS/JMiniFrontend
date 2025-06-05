@@ -19,7 +19,7 @@ class ErrorBoundary extends React.Component<React.PropsWithChildren<{}>, ErrorBo
 
   componentDidCatch(error, errorInfo) {
     // You can log error to an error reporting service here
-    console.error("Error Boundary Caught:", error, errorInfo);
+    // console.error("Error Boundary Caught:", error, errorInfo);
   }
 
   render() {

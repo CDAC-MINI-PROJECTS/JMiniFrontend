@@ -14,7 +14,7 @@ import  API from "@/lib/api";
 
 const SignIn = () => {
   const navigate = useNavigate();
-
+  
   const [isDisabled, setIsDisabled] = React.useState(false);
   const buttonRef = useRef(null);
 
@@ -33,14 +33,11 @@ const SignIn = () => {
     }
     
     try {
-      const response = await API.post('/auth/login',user);
-
-      console.log('response', response);
-    
-      localStorage.setItem("token", response.data.token);
-      
+      const response = await API.post('/auth/login',user);    
       if (response) {
-        // navigate("/");
+        
+        navigate("/");
+        localStorage.setItem("token", response.data.token);
         localStorage.setItem("isAuthenticated", "true");
       }
       console.log("User signed in:", user);

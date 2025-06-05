@@ -12,7 +12,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (!isAuthenticated) {
     // Redirect to login if not authenticated
-    // return <Navigate to="/sign-in" replace />;
+    return <Navigate to="/sign-in" replace />;
   }
 
   return <>{children}</>;
