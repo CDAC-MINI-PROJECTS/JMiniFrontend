@@ -10,9 +10,13 @@ import Settings from "./components/settings";
 import ProtectedRoute from "./layout/ProtectedRoute";
 import { useUser } from "./context/UserContext";
 import AdminPanel from "./pages/admin-panel";
+import NotFoundError from "./pages/404";
 
 function App() {
-  const user = useUser(); 
+  const { user }:{user: any} = useUser();
+  // const {
+    // body: { role },
+  // }: any = user || {};
   console.log("App component rendered", user);
   return (
     <Suspense fallback={<p>Loading...</p>}>
@@ -22,12 +26,13 @@ function App() {
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/sign-up" element={<SignUp />} />
         </Route>
-      
-      {/* Private only for admin role */}
-      <Route>
-         <Route path="/admin" element={<AdminPanel/>}/>
-      </Route>
 
+        {/* Private only for admin role */}
+        {user?.body?.role === "ROLE_ADMIN &&" && (
+          <Route>
+            <Route path="/admin" element={<AdminPanel />} />
+          </Route>
+        )}
 
         {/* private routes */}
         <Route>
@@ -58,7 +63,7 @@ function App() {
             }
           />
           <Route
-            path="/:id"
+            path="/profile/:id"
             element={
               <ProtectedRoute>
                 <Profile />
@@ -81,6 +86,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="*" element={<NotFoundError />} />
           {/* <Route path='/search/:query' element={<Search/>}/> */}
           {/* <Route path='/favorites' element={<Favorite/>}/> */}
           {/* <Route path='/hashtag/:tag' element={<HashTag/>}/> */}

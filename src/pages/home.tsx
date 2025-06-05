@@ -11,16 +11,21 @@ import RootLayout from "./layout";
 import { useToast } from "@/components/ui/use-toast.js";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Bug } from 'lucide-react';
+import { useUser } from "@/context/UserContext";
+import BottomNav from "@/components/bottom-nav";
 
 export default function Home() {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const {user: {
+    user_id: userId,
+    username,
+    firstName,
+    profile,
+    isVerified = false,
+  }} = useUser(); 
   const [isLoading, setIsLoading] = useState(false);
-  const [user_id, setUserID] = useState("");
-  const [username, setUsername] = useState("");
   const [name, setName] = useState("");
-  const [profile, setProfile] = useState("");
-  const [verified, setVerified] = useState(false);
   const [followings, setFollowings] = useState([]);
   const [posts, setPosts] = useState([]);
   const [isPostsLoading, setIsPostsLoading] = useState(true);
@@ -68,10 +73,10 @@ export default function Home() {
   return (
     <RootLayout>
       <div className="min-h-screen bg-background text-foreground">
-        <Header activeTab="followings" username={username} name={name} profile={profile} verified={verified}/>
+        <Header activeTab="followings" username={username} name={name} profile={profile} verified={isVerified}/>
         <div className="container mx-auto px-4 py-8 flex gap-8">
           <aside className="hidden lg:block w-1/4 sticky top-20 self-start">
-            <SideNav user_id={user_id} username={username} name={name} profile={profile} verified={verified}/>
+            <SideNav user_id={userId} username={username} name={firstName} profile={profile} verified={isVerified}/>
           </aside>
           <main className="w-full lg:w-1/2 pb-16 lg:pb-0">
           { isPostsLoading ? (
@@ -115,7 +120,7 @@ export default function Home() {
             </div>
           </aside>
         </div>
-        {/* <BottomNav user_id={user_id} username={username} name={name} profile={profile} verified={verified}/> */}
+        <BottomNav user_id={userId} username={username} name={name} profile={profile} verified={isVerified}/>
       </div>
     </RootLayout>
   );

@@ -1,12 +1,21 @@
 // src/context/UserContext.tsx
-import API from '@/lib/api';
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import API from "@/lib/api";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
+import { useNavigate } from "react-router";
 
 type User = {
-  id: string;
   username: string;
   email: string;
   role: string;
+  firstName: string;
+  profile: string;
+  isVerified: boolean;
 };
 
 type UserContextType = {
@@ -21,21 +30,23 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchLoggedInUser = async () => {
-        try {
-            const response = await API.get('/users/me'); // Adjust the endpoint as needed
-            if (response.status === 200) {
-                setUser(response.data);
-            } else {
-                console.error('Failed to fetch user data:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Error fetching user data:', error);
-        }
-    }
+      try {
+        const response = await API.get("/users/me"); // Adjust the endpoint as needed
+       console.log('response', response);
+       
+        setUser(response.data);
+      } catch (error) {
+         setUser(null);
+        localStorage.removeItem("token");
+        // localStorage.removeItem("isAuthenticated");
+      }
+    };
     fetchLoggedInUser();
-  },[]);
+  }, []);
   return (
     <UserContext.Provider value={{ user, setUser }}>
       {children}
@@ -46,6 +57,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 // Custom hook to use the context
 export const useUser = () => {
   const context = useContext(UserContext);
-  if (!context) throw new Error('useUser must be used within a UserProvider');
+  if (!context) throw new Error("useUser must be used within a UserProvider");
   return context;
 };

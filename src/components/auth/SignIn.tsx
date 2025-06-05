@@ -34,10 +34,13 @@ const SignIn = () => {
     
     try {
       const response = await API.post('/auth/login',user);
+
+      console.log('response', response);
+    
       localStorage.setItem("token", response.data.token);
       
       if (response) {
-        navigate("/");
+        // navigate("/");
         localStorage.setItem("isAuthenticated", "true");
       }
       console.log("User signed in:", user);
