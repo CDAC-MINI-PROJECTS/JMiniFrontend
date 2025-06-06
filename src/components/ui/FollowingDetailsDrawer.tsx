@@ -73,7 +73,7 @@ const FollowingDetailsDrawer = ({
                           </TooltipProvider>
                         )}
                       </div>
-                      <Link to={`/${user.username}`} onClick={onUserClick}>
+                      <Link to={`/profile/${user.username}`} onClick={onUserClick}>
                         <p className="text-sm text-muted-foreground">@{user.username}</p>
                       </Link>
                     </div>

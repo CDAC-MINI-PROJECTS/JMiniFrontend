@@ -23,7 +23,7 @@ const SignIn = () => {
     defaultValues: {
       username: "",
       password: "",
-    },
+    },  
   });
 
   const handleSignIn = async (user: z.infer<typeof SigninVal>) => {
@@ -31,17 +31,13 @@ const SignIn = () => {
     if (buttonRef.current) {
       (buttonRef.current as HTMLButtonElement).disabled = true;
     }
-    
     try {
       const response = await API.post('/auth/login',user);    
       if (response) {
-        
-        navigate("/");
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("isAuthenticated", "true");
+        navigate("/");
       }
-      console.log("User signed in:", user);
-      // navigate("/dashboard");
     } catch (error: any) {
       setValError(error.message || "An error occurred during sign in.");
       console.error("Sign in error:", error);

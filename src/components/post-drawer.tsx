@@ -26,7 +26,7 @@ interface PostDialogueProps {
   verified: boolean
 }
 
-export default function PostDrawer({ user_id, username, name, profile, verified }: PostDialogueProps ) {
+export default function PostDrawer({ user_id, username, name, profile, verified}: PostDialogueProps ) {
   const { toast } = useToast()
   const [isPostDrawerOpen, setPostDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("post");
@@ -36,69 +36,13 @@ export default function PostDrawer({ user_id, username, name, profile, verified 
   const [location, setLocation] = useState("");
   const [tag, setTag] = useState("");
   const [people, setPeople] = useState("");
+  const [captionError, setCaptionError] = useState("")
   
-  const {user}:{user:any} = useUser(); 
-  useEffect(() => {
-    if (isPostDrawerOpen) {
-      if (Cookies.get("access_token")) {
-        // setAccessToken(Cookies.get("access_token"))
-      } else {
-        // setAccessToken(undefined)
-        toast({
-          variant: "destructive",
-          title: "Google Drive token expired",
-          description: "Please sign in again.",
-          duration: 3000
-        })
-      }
-    }
-  }, [Cookies, isPostDrawerOpen]);
-  
-  interface TokenResponse {
-    access_token: string;
-    token_type: string;
-    scope: string;
-    expires_in: number;
-  }
-  
-  // const GoogleDriveAuth = useGoogleLogin({
-  //   onSuccess: async (tokenResponse: TokenResponse) => {
-  //     try {
-  //       const res = await GoogleDriveLogin(tokenResponse);
-  //       if (res === 200) {
-  //         setAccessToken(Cookies.get("access_token"))
-  //         toast({
-  //           title: "Google Drive Connected",
-  //           description: "You can now upload your photos.",
-  //           duration: 3000
-  //         })
-  //       } else {
-  //         toast({
-  //           variant: "destructive",
-  //           title: "Unable to sign into Google Drive",
-  //           description: "Please put external links in caption.",
-  //           duration: 3000
-  //         })
-  //       }
-  //     } catch (error) {
-  //       toast({
-  //         variant: "destructive",
-  //         title: "Unable to sign into Google Drive",
-  //         description: "Please put external links in caption.",
-  //         duration: 3000
-  //       })
-  //     }
-  //   },
-  //   onError: () => 
-  //     toast({
-  //       variant: "destructive",
-  //       title: "Unable to sign into Google Drive",
-  //       description: "Please put external links in caption.",
-  //       duration: 3000
-  //     }),
-  // });
+  const {
+    user
+  } = useUser(); 
 
-
+  
   const {
     GoogleDriveAuth,
     GoogleDriveLogin,
@@ -133,13 +77,35 @@ export default function PostDrawer({ user_id, username, name, profile, verified 
   };
 
   const handlePost = async () => {    
+   
+    if (files.length > 0) {
+      try {
+        fileLinks = await handleFileUpload(files);
+      } catch (error) {
+        console.error("Error uploading files:", error);
+        toast({
+          variant: "destructive",
+          title: "Failed to upload files",
+          description: "Please try again later.",
+          duration: 3000
+        });
+        return;
+      }
+    }
+
+    if(caption === ""){
+      setCaptionError('Caption Should not be Empty');
+      return ;
+    }
+     
     const response = await API.post('/dreams', {
        content: caption,
        tags: tag,
        visibility: 'public',
-       user_id: user.body.userId
-
+       userId: user?.userId
+       // TODO: add file links if available
     });
+
     if (response.status === 200) {
       toast({
         title: "Post created successfully",
@@ -162,15 +128,16 @@ export default function PostDrawer({ user_id, username, name, profile, verified 
     }
   }
     
-
-  useEffect(() => {
-    console.log("PostDrawer mounted", 
-caption,people, location,tag
-    );
-  }, [caption, location, tag, people]);
-
   const handleCaption = (e) => {
-    setCaption(e.target.value);
+    console.log(
+      e.target.value, "ss"
+    );
+    
+    if(e.target.value === ""){
+      setCaptionError("Caption should not be empty")
+    }else{
+      setCaption(e.target.value);
+    }
   }
 
   const handleLocation = (e) => {
@@ -264,6 +231,7 @@ caption,people, location,tag
                     Caption
                   </Label>
                   <Textarea rows={8} placeholder="What's new?" className='mt-2 mb-2 text-md' onChange={handleCaption}/>
+                  <div className='text-[red]'>{captionError}</div>
                   <div className='space-y-2'>
                     <Label htmlFor="photo" className="text-sm font-medium">
                       File
@@ -573,9 +541,7 @@ caption,people, location,tag
                     { accessToken == undefined ? (
                       <Button
                         variant="outline"
-                        // onClick={() => GoogleDriveAuth()}
-                        onClick={() => {}}
-
+                        onClick={() => GoogleDriveAuth()}
                         className="w-full"
                       >
                         <FaGoogleDrive className="h-4 w-4 mr-2" />

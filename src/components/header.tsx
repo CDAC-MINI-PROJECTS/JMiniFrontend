@@ -45,7 +45,8 @@ export default function Header({ activeTab="followings", username, name, profile
   };
 
   const signout = () => {
-    // Logout();
+    localStorage.removeItem('token');
+    localStorage.removeItem('isAuthenticated')
     navigate('/sign-in');
     return;
   }

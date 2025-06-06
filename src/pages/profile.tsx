@@ -92,6 +92,7 @@ import axios from "axios";
 import { useUser } from "@/context/UserContext";
 import { useGoogleDriveAPI } from "@/hooks/useGoogleDriveAPI";
 import FollowingDetailsDrawer from "@/components/ui/FollowingDetailsDrawer";
+import { transformFollowerData } from "@/lib/utils";
 
 interface UserDetails {
   userId: string;
@@ -122,10 +123,9 @@ interface UserDetails {
   _id: string;
 }
 
-export default function AccountProfile() {
+export default function AccountProfile({ user }) {
   const { toast } = useToast();
   const { id } = useParams();
-  const { user } = useUser();
 
   // State Variables
   const [isLoading, setIsLoading] = useState(true);
@@ -163,7 +163,7 @@ export default function AccountProfile() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [profileFile, setProfileFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [followed, setFollowed] = useState<boolean>(undefined);
+  const [followed, setFollowed] = useState<boolean>(false);
   const [followerDetails, setFollowerDetails] = useState([]);
   const [followingDetails, setFollowingDetails] = useState([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -179,9 +179,9 @@ export default function AccountProfile() {
   const [zip, setZip] = useState("");
   const [address, setAddress] = useState("");
 
-  const fetchData = async (username: string) => {
+  const fetchData = async () => {
     try {
-      const response: any = await API.get(`/users/${username}`);
+      const response = await API.get(`/users/${id}`);
 
       if (response?.data) {
         const {
@@ -198,14 +198,10 @@ export default function AccountProfile() {
           occupation,
           dob: birthday,
           createdAt: joinDate,
-          // followers,
-          // followings,
-          // favors,
-          // _id: currentUserID,
+          userId,
         } = response?.data;
-        console.log("User data fetched:", response);
-        setProfile(profile || "/profile-1.jpg");
-        setCover(cover || "/cover-1.jpg");
+        setProfile(profile);
+        setCover(cover);
         setBio(bio || "");
         setName(name || "");
         setUsername(username || "");
@@ -215,23 +211,21 @@ export default function AccountProfile() {
         setLocation(location || "");
         setWebsite(website || []);
         setOccupation(occupation || []);
-        // setBirthday(dob || "");
-        // setJoinDate(createdAt || "");
-        // setFollowers(followers || []);
-        // setFollowings(followings || []);
-        // setFavors(favors || []);
-        // setCurrentUserID(_id || "");
+        setUserID(userId);
+        console.log(user.userId, "user.userId");
+        getFollower(user.userId, userId);
       }
       setIsBtnLoading(false);
+      setIsPostsLoading(false);
       setIsLoading(false);
     } catch (error) {}
   };
 
   const fetchPost = async (userId: number) => {
     try {
-      const response = await API.get(`/dreams/${userId}`);
-      if (response.data && response.data.posts) {
-        setPosts(response.data.posts);
+      const response = await API.get(`/dreams/user/${userId}`);
+      if (response.data) {
+        setPosts(response.data);
         setIsPostsLoading(false);
       } else {
         setPosts([]);
@@ -312,7 +306,7 @@ export default function AccountProfile() {
 
       //Upate Profile
       const updatedProfile = {
-        profilePictureUrl: newProfileUrl,
+        profile: newProfileUrl,
         cover: newCoverUrl,
         bio: bio,
         firstName: firstName,
@@ -331,7 +325,7 @@ export default function AccountProfile() {
       console.log("Updated Profile:", updatedProfile);
 
       await API.put(`/users/${currentUsername}`, updatedProfile);
-      await fetchData(currentUsername);
+      await fetchData();
       toast({ title: "Profile updated successfully" });
     } catch (error) {
       console.log(error);
@@ -344,7 +338,34 @@ export default function AccountProfile() {
   };
 
   const follow = async () => {
+    await API.post("/follows", {
+      followedId: user_id,
+      followerId: user.userId,
+    });
+    getFollower(user.userId, user_id);
     setFollowed(true);
+  };
+
+  const getFollower = async (followerId, followingId) => {
+    console.log("isFollwer");
+
+    const follower = await API.get(`/follows/followers/${followingId}`);
+    let tranformData = transformFollowerData(follower.data, 'follower');
+    setFollowerDetails(tranformData.connections);
+    setFollowers(follower.data);
+    const following = await API.get(`/follows/following/${followingId}`);
+    let tranformData1 = transformFollowerData(following.data, 'following');
+    setFollowingDetails(tranformData1.connections);
+    setFollowings(following.data);
+
+    console.log("following", following);
+    console.log("follower", follower);
+
+    const isFollower = await API.get(
+      `/follows/isFollowing/${followerId}/${followingId}`
+    );
+    setFollowed(isFollower.data);
+    //  return response.data;
   };
 
   const favorite = async () => {};
@@ -361,12 +382,12 @@ export default function AccountProfile() {
     setIsDrawerOpen2(false);
   };
 
+  useEffect(() => {
+    fetchData();
+  }, [id]);
   // Side Effects
   useEffect(() => {
     setCurrentUsername(user?.username);
-    if (user?.username) {
-      fetchData(user?.username);
-    }
   }, [user]);
 
   useEffect(() => {
@@ -374,6 +395,10 @@ export default function AccountProfile() {
       setFollowed(followers.includes(currentUserID));
     }
   }, [followers, currentUserID]);
+
+  useEffect(() => {
+    setFollowed(followed);
+  }, [followed]);
 
   useEffect(() => {
     if (user?.userId) {
@@ -1166,13 +1191,13 @@ export default function AccountProfile() {
                       currentUserID={currentUserID}
                       currentUsername={currentUsername}
                       id={post.$id}
-                      user_id={post.user_id}
-                      name={name}
-                      username={username}
-                      profile={profile}
+                      user_id={post.user.user_id}
+                      name={post.user.firstName}
+                      username={post.user.username}
+                      profile={post.user.profile}
                       isVerified={verified}
-                      timestamp={post.$createdAt}
-                      caption={post.caption}
+                      timestamp={post.createdAt}
+                      caption={post.content}
                       type={post.type}
                       files={post.files}
                       location={post.location}

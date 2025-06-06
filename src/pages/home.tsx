@@ -13,15 +13,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Bug } from "lucide-react";
 import { useUser } from "@/context/UserContext";
 import BottomNav from "@/components/bottom-nav";
+import API from "@/lib/api";
 
-export default function Home() {
+export default function Home({
+    user: { userId, username, firstName, profile, isVerified = false },
+  } ) {
   const { toast } = useToast();
   const navigate = useNavigate();
-  
-  const {
-    user: { userId, username, firstName, profile, isVerified = false }
-  } = useUser();
-
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
   const [followings, setFollowings] = useState([]);
@@ -35,6 +33,7 @@ export default function Home() {
 
   useEffect(() => {
     const loadPosts = async () => {
+      console.log('loading post')
       try {
         setIsPostsLoading(true);
         await fetchPosts();
@@ -44,18 +43,35 @@ export default function Home() {
       }
     };
 
-    loadPosts();
-
+    if(userId !== null){
+      loadPosts();
+    }
     const intervalId = setInterval(async () => {
-      await fetchPosts();
+      if(userId !== null){
+        await fetchPosts();
+      }
     }, 30000);
-
+  
     return () => clearInterval(intervalId);
-  }, [followings]);
+  
+  }, [userId]);
 
   const verifyUser = async () => {};
 
-  const fetchPosts = async () => {};
+  const fetchPosts = async () => {
+    try {
+      const response = await API.get(`/dreams/user/${userId}`);
+      setPosts(response.data);
+    } catch (error) {}
+  };
+
+  const deletePost = async (id) => {
+     const response  = await API.delete(`/dreams/${id}`);
+     if(response.status == 200){
+       fetchPosts();
+     }
+  };
+
 
   if (isLoading) {
     return (
@@ -121,7 +137,31 @@ export default function Home() {
                 </div>
               </div>
             ) : (
-              <></>
+              posts.map((post, index) => (
+                <Post
+                  key={index}
+                  currentUserID={userId}
+                  currentUsername={username}
+                  id={post.dreamId}
+                  user_id={post.user.userId}
+                  name={post.user.firstName}
+                  username={post.user.username}
+                  profile={post.user.profile}
+                  isVerified={post.user.verified}
+                  timestamp={post.createdAt}
+                  caption={post.content}
+                  type={post.type}
+                  files={post.files}
+                  location={post.location}
+                  hashtags={post.hashtags}
+                  tagged_people={post.tagged_people}
+                  likes={post.likes}
+                  comments={post.comment}
+                  reposts={post.reposts}
+                  deletePost={deletePost}
+                  {...post}
+                />
+              ))
             )}
           </main>
           <aside className="hidden lg:block w-1/4 sticky top-20 self-start">

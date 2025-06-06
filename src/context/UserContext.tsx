@@ -21,16 +21,17 @@ type User = {
 
 type UserContextType = {
   user: User;
+  isLoading: boolean;
   setUser: (user: User | null) => void;
 };
 
 // Create the context
-const UserContext = createContext<UserContextType | undefined>(undefined);
+export const UserContext = createContext<UserContextType | undefined>(undefined);
 
 // Create a provider
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>({
-    userId: 0,
+    userId: null,
     username: "",
     email: "",
     role: "",
@@ -38,24 +39,34 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     profile: "",
     isVerified: false,
   });
+  const [isLoading, setIsLoading] = useState(true); // Add a loading state
 
- const navigate = useNavigate();
 
   useEffect(() => {
     const fetchLoggedInUser = async () => {
       try {
         const response = await API.get("/users/me"); // Adjust the endpoint as needed       
+        console.log(response.data)
         setUser(response.data);
       } catch (error) {
-         setUser(null);
+        setUser(null);
         localStorage.removeItem("token");
-        // localStorage.removeItem("isAuthenticated");
+        localStorage.removeItem("isAuthenticated");
+      } finally {
+        setIsLoading(false)
       }
     };
     fetchLoggedInUser();
   }, []);
+
+  const contextValue = {
+    user,
+    isLoading,
+    setUser, // Provide a way to update the user
+  };
+
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={contextValue}>
       {children}
     </UserContext.Provider>
   );
@@ -65,5 +76,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 export const useUser = () => {
   const context = useContext(UserContext);
   if (!context) throw new Error("useUser must be used within a UserProvider");
-  return context;
+
+  return context
 };
