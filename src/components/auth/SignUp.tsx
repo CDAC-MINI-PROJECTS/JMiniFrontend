@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { SignupVal } from "@/lib/validation";
 import { Link } from "react-router-dom";
 import API from "@/lib/api";
+import { authApis } from "@/lib/Apis/authApis";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -36,15 +37,14 @@ const SignUp = () => {
         buttonRef.current.innerHTML = `Signing Up...`;
       }
 
-      console.log("User data:", user);
-      const newUser = {
-        first_name: user.name,
+      const result = await authApis.signUp({
+        firstName: user.name,
         username: user.username,
         email: user.email,
         password: user.password,
-        role: user.role
-      }
-      const result = await API.post('/auth/register', newUser);
+        isActive: true,
+        role: user.role || "ROLE_USER"
+      });
 
       if (result) {
         console.log("User signed up:", user);
@@ -81,6 +81,7 @@ const SignUp = () => {
             </div>
 
             <form onSubmit={form.handleSubmit(handleSignUp)} className="space-y-4">
+              
               <div className="space-y-2">
                 <FormField control={form.control} name="name" render={({ field }) => (
                   <FormItem>

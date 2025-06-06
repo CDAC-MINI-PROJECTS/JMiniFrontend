@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button";
 import API from "@/lib/api";
+import { useUser } from "@/context/UserContext";
 const postsMock = Array.from({ length: 10 }, (_, i) => ({
   $id: `post-${i + 1}`,
   $createdAt: new Date(Date.now() - i * 3600000).toISOString(), // i hours ago
@@ -30,6 +31,7 @@ const postsMock = Array.from({ length: 10 }, (_, i) => ({
 
 export default function Explore() {
   const { toast } = useToast();
+  const {user} = useUser();
   const [isLoading, setIsLoading] = useState(false);
   const [isPostLoading, setIsPostLoading] = useState(true);
   const [user_id, setUserID] = useState("");
@@ -41,34 +43,6 @@ export default function Explore() {
   const [postUserDetails, setPostUserDetails] = useState([]);
   const [lastPostId, setLastPostId] = useState(null);
   //const [showTabs, setShowTabs] = useState(false);
-  
-  useEffect(() => {
-    // const verifyUser = async () => {
-    //   setIsLoading(true);
-      
-    //   const response = await getCurrentUser();
-
-    //   if (response.$id) {
-    //     setUserID(response.$id);
-    //     setUsername(response.username);
-    //     setName(response.name);
-    //     setProfile(response.profile);
-    //     setVerified(response.verified);
-
-    //     onMessage(messaging, (payload) => {
-    //       toast({
-    //         title: payload.notification.title,
-    //         description: payload.notification.body,
-    //         duration: 5000,
-    //       });
-    //     });
-    //   }
-
-    //   setIsLoading(false);
-    // };
-
-    // verifyUser();
-  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -101,13 +75,16 @@ console.log('post', posts)
     );
   }
 
+  console.log('Explore Page', user, user_id, username, name, profile, verified);
+  
+
   return (
     <RootLayout>
       <div className="min-h-screen bg-background text-foreground">
         <Header activeTab="#" username={username} name={name} profile={profile} verified={verified}/>
         <div className="container mx-auto px-4 py-4 flex gap-8">
           <aside className="hidden lg:block w-1/4 sticky top-20 self-start">
-            <SideNav user_id={user_id} username={username} name={name} profile={profile} verified={verified}/>
+            <SideNav user_id={user?.userId} username={user?.username} name={user?.firstName} profile={user?.profile} verified={user?.isVerified}/>
           </aside>
           <main className="w-full lg:w-1/2 pb-16 lg:pb-0">
             <div className="flex justify-between items-center pb-2">
@@ -158,13 +135,13 @@ console.log('post', posts)
                       key={index} 
                       currentUserID={user_id}
                       currentUsername={username}
-                      id={post.$id} 
+                      id={post.dreamId} 
                       user_id={post.user_id} 
-                      name={postUserDetails[post.$id]?.name} 
-                      username={postUserDetails[post.$id]?.username} 
-                      profile={postUserDetails[post.$id]?.profile} 
-                      isVerified={postUserDetails[post.$id]?.verified} 
-                      timestamp={post.$createdAt} 
+                      name={post.user.name} 
+                      username={post.user.username} 
+                      profile={post.user.profile} 
+                      isVerified={post.user.verified} 
+                      timestamp={post.createdAt} 
                       caption={post.content} 
                       type={post.type} 
                       files={post.files} 

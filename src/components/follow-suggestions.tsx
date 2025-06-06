@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { BadgeCheck } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
+// TODO : Integration with API to provide suggestions
 const suggestions = [
   { name: 'MohiniPatil', username: 'mmohini98', avatar: '/logo.png', verified: true },
 ]
@@ -32,7 +33,7 @@ export default function FollowSuggestions() {
                   <p className="text-xs text-muted-foreground">@{suggestion.username}</p>
                 </div>
               </div>
-              <Link to={"/"+suggestion.username}>
+              <Link to={"/profile/"+suggestion.username}>
                 <Button variant="outline" size="sm">View</Button>
               </Link>
             </li>

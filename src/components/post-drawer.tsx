@@ -16,6 +16,7 @@ import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/comp
 import { MapPin, Hash, Users, SquarePen, Image, BadgeCheck, Clapperboard, GalleryVertical, Info } from 'lucide-react';
 import API from '@/lib/api';
 import { useUser } from '@/context/UserContext';
+import { useGoogleDriveAPI } from '@/hooks/useGoogleDriveAPI';
 
 interface PostDialogueProps {
   user_id: string,
@@ -25,10 +26,9 @@ interface PostDialogueProps {
   verified: boolean
 }
 
-export default function PostDrawer({ user_id, username, name, profile, verified }: PostDialogueProps ) {
+export default function PostDrawer({ user_id, username, name, profile, verified}: PostDialogueProps ) {
   const { toast } = useToast()
   const [isPostDrawerOpen, setPostDrawerOpen] = useState(false);
-  const [accessToken, setAccessToken] = useState(null);
   const [activeTab, setActiveTab] = useState("post");
   const [files, setFiles] = useState<File[]>([]);
   let fileLinks = [];
@@ -36,166 +36,22 @@ export default function PostDrawer({ user_id, username, name, profile, verified 
   const [location, setLocation] = useState("");
   const [tag, setTag] = useState("");
   const [people, setPeople] = useState("");
+  const [captionError, setCaptionError] = useState("")
   
-  const {user}:{user:any} = useUser(); 
-  useEffect(() => {
-    if (isPostDrawerOpen) {
-      if (Cookies.get("access_token")) {
-        setAccessToken(Cookies.get("access_token"))
-      } else {
-        setAccessToken(undefined)
-        toast({
-          variant: "destructive",
-          title: "Google Drive token expired",
-          description: "Please sign in again.",
-          duration: 3000
-        })
-      }
-    }
-  }, [Cookies, isPostDrawerOpen]);
-  
-  interface TokenResponse {
-    access_token: string;
-    token_type: string;
-    scope: string;
-    expires_in: number;
-  }
-  
-  // const GoogleDriveAuth = useGoogleLogin({
-  //   onSuccess: async (tokenResponse: TokenResponse) => {
-  //     try {
-  //       const res = await GoogleDriveLogin(tokenResponse);
-  //       if (res === 200) {
-  //         setAccessToken(Cookies.get("access_token"))
-  //         toast({
-  //           title: "Google Drive Connected",
-  //           description: "You can now upload your photos.",
-  //           duration: 3000
-  //         })
-  //       } else {
-  //         toast({
-  //           variant: "destructive",
-  //           title: "Unable to sign into Google Drive",
-  //           description: "Please put external links in caption.",
-  //           duration: 3000
-  //         })
-  //       }
-  //     } catch (error) {
-  //       toast({
-  //         variant: "destructive",
-  //         title: "Unable to sign into Google Drive",
-  //         description: "Please put external links in caption.",
-  //         duration: 3000
-  //       })
-  //     }
-  //   },
-  //   onError: () => 
-  //     toast({
-  //       variant: "destructive",
-  //       title: "Unable to sign into Google Drive",
-  //       description: "Please put external links in caption.",
-  //       duration: 3000
-  //     }),
-  // });
+  const {
+    user
+  } = useUser(); 
 
-  const searchFolder = async (folderName) => {
-    const query = `name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
-    try {
-      const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
   
-      const result = await response.json();
-      if (result.files && result.files.length > 0) {
-        return result.files[0].id;
-      }
-      return null;
-    } catch (error) {
-      throw error;
-    }
-  };
-  
-  const createFolder = async (folderName) => {
-    const metadata = {
-      name: folderName,
-      mimeType: 'application/vnd.google-apps.folder',
-    };
-  
-    try {
-      const response = await fetch('https://www.googleapis.com/drive/v3/files', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(metadata),
-      });
-  
-      const result = await response.json();
-      return result.id;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const uploadFile = async (file, folderId) => {
-      // Upload file first
-      const metadata = {
-        name: file.name,
-        mimeType: file.type,
-        parents: [folderId],
-      };
-    
-      const form = new FormData();
-      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-      form.append('file', file);
-    
-      try {
-        const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: form,
-        });
-    
-        const result = await response.json();
-        
-        // Make the file public
-        try {
-          const permissionResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${result.id}/permissions`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${accessToken}`,
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-              role: 'reader',
-              type: 'anyone',
-              allowFileDiscovery: false
-            })
-          });
-
-          if (!permissionResponse.ok) {
-            throw new Error('Failed to set file permissions. Please sign in again.');
-          }
-        } catch (error) {
-          throw new Error('Failed to make file public. Please sign in again.');
-        }
-    
-        if (file.type.startsWith('image/')) {
-          fileLinks.push(`https://drive.google.com/thumbnail?authuser=0&sz=w1080&id=${result.id}`);
-        } else if (file.type.startsWith('video/')) { 
-          fileLinks.push(`https://drive.google.com/file/d/${result.id}/preview`);
-        }
-      } catch (error) {
-        throw error;
-      }
-    };
+  const {
+    GoogleDriveAuth,
+    GoogleDriveLogin,
+    searchFolder,
+    createFolder,
+    uploadFile,
+    resetToken,
+    accessToken,
+  } = useGoogleDriveAPI();
 
   const handleFileUpload = async (files: File[]): Promise<string[]> => {
     try {
@@ -205,12 +61,11 @@ export default function PostDrawer({ user_id, username, name, profile, verified 
         folderId = await createFolder('DreamsDoc');
       }
   
-      const uploadPromises = files.map((file) => uploadFile(file, folderId));
+      const uploadPromises = files.map((file) => uploadFile(file, folderId,file.type));
       await Promise.all(uploadPromises);
       return ;
     } catch (error) {
-      Cookies.remove('access_token')
-      setAccessToken(undefined)
+      resetToken();
       toast({
         variant: "destructive",
         title: "Unable to upload media",
@@ -222,13 +77,35 @@ export default function PostDrawer({ user_id, username, name, profile, verified 
   };
 
   const handlePost = async () => {    
+   
+    if (files.length > 0) {
+      try {
+        fileLinks = await handleFileUpload(files);
+      } catch (error) {
+        console.error("Error uploading files:", error);
+        toast({
+          variant: "destructive",
+          title: "Failed to upload files",
+          description: "Please try again later.",
+          duration: 3000
+        });
+        return;
+      }
+    }
+
+    if(caption === ""){
+      setCaptionError('Caption Should not be Empty');
+      return ;
+    }
+     
     const response = await API.post('/dreams', {
        content: caption,
        tags: tag,
        visibility: 'public',
-       user_id: user.body.userId
-
+       userId: user?.userId
+       // TODO: add file links if available
     });
+
     if (response.status === 200) {
       toast({
         title: "Post created successfully",
@@ -251,15 +128,16 @@ export default function PostDrawer({ user_id, username, name, profile, verified 
     }
   }
     
-
-  useEffect(() => {
-    console.log("PostDrawer mounted", 
-caption,people, location,tag
-    );
-  }, [caption, location, tag, people]);
-
   const handleCaption = (e) => {
-    setCaption(e.target.value);
+    console.log(
+      e.target.value, "ss"
+    );
+    
+    if(e.target.value === ""){
+      setCaptionError("Caption should not be empty")
+    }else{
+      setCaption(e.target.value);
+    }
   }
 
   const handleLocation = (e) => {
@@ -353,6 +231,7 @@ caption,people, location,tag
                     Caption
                   </Label>
                   <Textarea rows={8} placeholder="What's new?" className='mt-2 mb-2 text-md' onChange={handleCaption}/>
+                  <div className='text-[red]'>{captionError}</div>
                   <div className='space-y-2'>
                     <Label htmlFor="photo" className="text-sm font-medium">
                       File
@@ -360,8 +239,7 @@ caption,people, location,tag
                     { accessToken == undefined ? (
                       <Button
                         variant="outline"
-                        // onClick={() => GoogleDriveAuth()}
-                        onClick={() =>{}}
+                        onClick={() => GoogleDriveAuth()}
                         className="w-full"
                       >
                         <FaGoogleDrive className="h-4 w-4 mr-2" />
@@ -512,8 +390,7 @@ caption,people, location,tag
                     { accessToken == undefined ? (
                       <Button
                         variant="outline"
-                        // onClick={() => GoogleDriveAuth()}
-                        onClick={() => {}}
+                        onClick={() => GoogleDriveAuth()}
                         className="w-full"
                       >
                         <FaGoogleDrive className="h-4 w-4 mr-2" />
@@ -664,9 +541,7 @@ caption,people, location,tag
                     { accessToken == undefined ? (
                       <Button
                         variant="outline"
-                        // onClick={() => GoogleDriveAuth()}
-                        onClick={() => {}}
-
+                        onClick={() => GoogleDriveAuth()}
                         className="w-full"
                       >
                         <FaGoogleDrive className="h-4 w-4 mr-2" />

@@ -132,16 +132,16 @@
   
 }
 
-:root {
+/* :root {
   --primary: 330 81% 60%; /* Pink */
-  --primary-foreground: 0 0% 98%;
-  --secondary: 270 95% 75%; /* Purple */
-  --secondary-foreground: 0 0% 9%;
-  --accent: 315 100% 85%; /* Light Pink */
-  --accent-foreground: 0 0% 9%;
-}
+  /* --primary-foreground: 0 0% 98%; */
+  /* --secondary: 270 95% 75%; Purple */
+  /* --secondary-foreground: 0 0% 9%; */
+  /* --accent: 315 100% 85%; Light Pink */
+  /* --accent-foreground: 0 0% 9%; */
 
-.bg-gradient-pink-purple {
+
+/* .bg-gradient-pink-purple {
   background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
 }
 
@@ -150,7 +150,7 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-}
+} */
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {

@@ -10,10 +10,22 @@ import Settings from "./components/settings";
 import ProtectedRoute from "./layout/ProtectedRoute";
 import { useUser } from "./context/UserContext";
 import AdminPanel from "./pages/admin-panel";
+import NotFoundError from "./pages/404";
+import { Loader, Loader2 } from "lucide-react";
 
 function App() {
-  const user = useUser(); 
+  const { user, isLoading } = useUser();
+
   console.log("App component rendered", user);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-4 h-[80vh]">
+        <Loader className="animate-spin w-40 h-40" />
+      </div>
+    );
+  }
+
   return (
     <Suspense fallback={<p>Loading...</p>}>
       <Routes>
@@ -22,12 +34,13 @@ function App() {
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/sign-up" element={<SignUp />} />
         </Route>
-      
-      {/* Private only for admin role */}
-      <Route>
-         <Route path="/admin" element={<AdminPanel/>}/>
-      </Route>
 
+        {/* Private only for admin role */}
+        {/* {user?.role === "ROLE_ADMIN &&" && ( */}
+        <Route>
+          <Route path="/admin" element={<AdminPanel />} />
+        </Route>
+        {/* )} */}
 
         {/* private routes */}
         <Route>
@@ -36,7 +49,7 @@ function App() {
             path="/"
             element={
               <ProtectedRoute>
-                <Home />
+                <Home user={user} />
               </ProtectedRoute>
             }
           />
@@ -58,10 +71,10 @@ function App() {
             }
           />
           <Route
-            path="/:id"
+            path="/profile/:id"
             element={
               <ProtectedRoute>
-                <Profile />
+                <Profile user={user} />
               </ProtectedRoute>
             }
           />
@@ -81,6 +94,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="*" element={<NotFoundError />} />
           {/* <Route path='/search/:query' element={<Search/>}/> */}
           {/* <Route path='/favorites' element={<Favorite/>}/> */}
           {/* <Route path='/hashtag/:tag' element={<HashTag/>}/> */}
