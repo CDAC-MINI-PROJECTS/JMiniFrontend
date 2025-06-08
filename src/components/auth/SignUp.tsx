@@ -12,7 +12,10 @@ import { SignupVal } from "@/lib/validation";
 import { Link } from "react-router-dom";
 import API from "@/lib/api";
 import { authApis } from "@/lib/Apis/authApis";
-
+enum Role{
+  ROLE_USER ="ROLE_USER",
+  ROLE_ADMIN = "ROLE_ADMIN"
+}
 const SignUp = () => {
   const navigate = useNavigate();
 
@@ -37,13 +40,14 @@ const SignUp = () => {
         buttonRef.current.innerHTML = `Signing Up...`;
       }
 
+
       const result = await authApis.signUp({
         firstName: user.name,
         username: user.username,
         email: user.email,
         password: user.password,
         isActive: true,
-        role: user.role || "ROLE_USER"
+        role: user?.role === Role.ROLE_ADMIN ? Role.ROLE_ADMIN : Role.ROLE_USER
       });
 
       if (result) {

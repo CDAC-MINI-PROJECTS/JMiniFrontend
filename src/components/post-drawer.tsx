@@ -15,8 +15,8 @@ import { FaGoogleDrive } from "react-icons/fa";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { MapPin, Hash, Users, SquarePen, Image, BadgeCheck, Clapperboard, GalleryVertical, Info } from 'lucide-react';
 import API from '@/lib/api';
-import { useUser } from '@/context/UserContext';
 import { useGoogleDriveAPI } from '@/hooks/useGoogleDriveAPI';
+import { useCurrentLoggedInUser } from '@/hooks/useCurrentLoggedInUser';
 
 interface PostDialogueProps {
   user_id: string,
@@ -32,6 +32,8 @@ export default function PostDrawer({ user_id, username, name, profile, verified}
   const [activeTab, setActiveTab] = useState("post");
   const [files, setFiles] = useState<File[]>([]);
   let fileLinks = [];
+  const [title, setTitle] = useState("");
+
   const [caption, setCaption] = useState("");
   const [location, setLocation] = useState("");
   const [tag, setTag] = useState("");
@@ -39,8 +41,9 @@ export default function PostDrawer({ user_id, username, name, profile, verified}
   const [captionError, setCaptionError] = useState("")
   
   const {
-    user
-  } = useUser(); 
+    user,
+    isLoading
+  } = useCurrentLoggedInUser(); 
 
   
   const {
@@ -101,6 +104,7 @@ export default function PostDrawer({ user_id, username, name, profile, verified}
     const response = await API.post('/dreams', {
        content: caption,
        tags: tag,
+       title: title,
        visibility: 'public',
        userId: user?.userId
        // TODO: add file links if available
@@ -227,6 +231,10 @@ export default function PostDrawer({ user_id, username, name, profile, verified}
                       </div>
                     </div>
                   </div>
+                  <Label htmlFor="title" className="text-sm font-medium mb-2">
+                    Title
+                  </Label>
+                  <Input name="title" value={title} onChange={(e)=> setTitle(e.target.value)}/>
                   <Label htmlFor="caption" className="text-sm font-medium">
                     Caption
                   </Label>

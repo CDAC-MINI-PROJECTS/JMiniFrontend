@@ -11,12 +11,11 @@ import RootLayout from "./layout";
 import { useToast } from "@/components/ui/use-toast.js";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Bug } from "lucide-react";
-import { useUser } from "@/context/UserContext";
 import BottomNav from "@/components/bottom-nav";
 import API from "@/lib/api";
 
 export default function Home({
-    user: { userId, username, firstName, profile, isVerified = false },
+    user: { userId = 0, username, firstName, profile, isVerified = false },
   } ) {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -140,6 +139,7 @@ export default function Home({
               posts.map((post, index) => (
                 <Post
                   key={index}
+                  title={post.title}
                   currentUserID={userId}
                   currentUsername={username}
                   id={post.dreamId}

@@ -13,7 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button";
 import API from "@/lib/api";
-import { useUser } from "@/context/UserContext";
+import { useCurrentLoggedInUser } from "@/hooks/useCurrentLoggedInUser";
+
 const postsMock = Array.from({ length: 10 }, (_, i) => ({
   $id: `post-${i + 1}`,
   $createdAt: new Date(Date.now() - i * 3600000).toISOString(), // i hours ago
@@ -29,9 +30,10 @@ const postsMock = Array.from({ length: 10 }, (_, i) => ({
   reposts: `"${Math.floor(Math.random() * 10)}"`,
 }));
 
+
 export default function Explore() {
   const { toast } = useToast();
-  const {user} = useUser();
+  const { user, isLoading: isLoadingUser} = useCurrentLoggedInUser();
   const [isLoading, setIsLoading] = useState(false);
   const [isPostLoading, setIsPostLoading] = useState(true);
   const [user_id, setUserID] = useState("");

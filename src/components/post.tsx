@@ -63,9 +63,9 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { useUser } from "@/context/UserContext";
-import { getRelativeTime } from "@/lib/utils";
+import { formatCount, getRelativeTime } from "@/lib/utils";
 import API from "@/lib/api";
+import { useCurrentLoggedInUser } from "@/hooks/useCurrentLoggedInUser";
 
 interface PostProps {
   currentUserID: string;
@@ -75,6 +75,7 @@ interface PostProps {
   name: string;
   username: string;
   profile: string;
+  title: string;
   isVerified?: boolean;
   timestamp: string;
   caption: string;
@@ -98,7 +99,7 @@ interface PostProps {
     profile: string;
     verified: boolean;
   } | null;
-  deletePost
+  deletePost;
 }
 
 export default function Post({
@@ -111,6 +112,7 @@ export default function Post({
   profile,
   isVerified = false,
   timestamp,
+  title,
   caption,
   type,
   files,
@@ -125,7 +127,7 @@ export default function Post({
   deletePost,
 }: PostProps) {
   const userID = currentUserID;
-  const { user: currentUser }: { user: any } = useUser();
+  const { user: currentUser } = useCurrentLoggedInUser();
 
   // const user = currentUser.body
   const { toast } = useToast();
@@ -145,8 +147,12 @@ export default function Post({
   const [commentLength, setCommentLength] = useState(0);
   const [showInfoDialog, setShowInfoDialog] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const [dreamId,setDreamId]  =useState(null);
 
   const formatCaption = (text: string) => {
+    console.log('text', text);
+    
     return text.split(/(\s+)/).map((word, index) => {
       if (word.match(/^(https?:\/\/[^\s]+)/)) {
         return (
@@ -219,6 +225,9 @@ export default function Post({
         return;
       }
 
+      setCommentUsers(comments);
+      setComments(comments);
+
       // Fetch all comments from the comments collection
     } catch (error) {
       toast({
@@ -232,7 +241,16 @@ export default function Post({
     }
   };
 
-  const handleComment = async () => {};
+  const handleComment = async () => {
+    const newComment = await API.post("/comments", {
+      commentText: commentText,
+      dreamId: id,
+      userId: user_id,
+    });
+    setCommentUsers((prev) => [...prev, newComment.data]);
+    setComments((prev) => [...prev,newComment.data]);
+    // setIsCommentDrawerOpen(false)
+  };
 
   const handleUserClick = () => {
     setIsCommentDrawerOpen(false);
@@ -350,7 +368,7 @@ export default function Post({
                   <Info className="w-4 h-4 mr-2" />
                   Show info
                 </DropdownMenuItem>
-                  
+
                 {userID === user_id ? (
                   <DropdownMenuItem
                     className="text-red-600 focus:text-red-700"
@@ -373,7 +391,8 @@ export default function Post({
           </div>
         </CardHeader>
         <CardContent>
-          <p className="mb-2 whitespace-pre-wrap">{caption + "ss"}</p>
+          <div className="font-extrabold text-2xl">{title}</div>
+          <p className="mb-2 whitespace-pre-wrap">{caption}</p>
           {files?.length > 1 && type === "post" && (
             <PhotoProvider>
               <ScrollArea className="w-full whitespace-nowrap rounded-md">
@@ -450,7 +469,7 @@ export default function Post({
                       onClick={handleShowComments}
                     >
                       <MessageCircle className="h-4 w-4 mr-1" />
-                      {/* {formatCount(comments?.length || 0)} */}
+                      { comments?.length || 0}
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -580,7 +599,7 @@ export default function Post({
               <DrawerTitle>Likes</DrawerTitle>
               <DrawerDescription>People who liked this post</DrawerDescription>
             </DrawerHeader>
-            <ScrollArea className="h-[70vh]">
+            <ScrollArea  className="h-[70vh]">
               <div className="p-4">
                 {isLoadingUsers ? (
                   <div className="flex items-center justify-center">
@@ -664,45 +683,46 @@ export default function Post({
                   ) : (
                     commentUsers.map((user, index) => {
                       const comment = commentsList[index];
+                     console.log(comment,"------------------------------------")
                       return (
                         <div
-                          key={comment.$id}
+                          key={comment?.$id}
                           className="flex items-start gap-4"
                         >
                           <Link
-                            to={`/${user.username}`}
+                            to={`/${comment?.user?.username}`}
                             onClick={handleUserClick}
                           >
                             <Avatar>
                               <AvatarImage
-                                src={user.profile}
-                                alt={user.name}
+                                src={comment?.user?.profile}
+                                alt={comment?.user?.name}
                                 className="object-cover"
                               />
-                              <AvatarFallback>Fr</AvatarFallback>
+                              <AvatarFallback>MM</AvatarFallback>
                             </Avatar>
                           </Link>
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
                               <Link
-                                to={`/${user.username}`}
+                                to={`/${comment?.user?.username}`}
                                 onClick={handleUserClick}
                                 className="font-semibold hover:underline"
                               >
-                                {user.name}
+                                {comment?.user?.name}
                               </Link>
-                              {user.verified && (
+                              {comment?.user?.verified && (
                                 <BadgeCheck className="h-4 w-4 text-blue-500" />
                               )}
                               <span className="text-md text-muted-foreground">
-                                ·
+                              .
                               </span>
                               <span className="text-sm text-muted-foreground">
-                                {/* {getRelativeTime(comment.$createdAt)} */}
+                                {getRelativeTime(comment?.createdAt)}
                               </span>
                             </div>
                             <p className="text-md mt-1 whitespace-pre-wrap break-words">
-                              {/* {formatCaption(comment.content)} */}
+                              {formatCaption(comment?.commentText)}
                             </p>
                           </div>
                         </div>
@@ -720,7 +740,10 @@ export default function Post({
                   className="flex-1 text-md"
                   maxLength={5000}
                   onKeyDown={handleKeyDown}
-                  onChange={(e) => setCommentLength(e.target.value.length)}
+                  onChange={(e) => {
+                    setCommentLength(e.target.value.length);
+                    setCommentText(e.target.value);
+                  }}
                 />
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">

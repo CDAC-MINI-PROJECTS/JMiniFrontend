@@ -8,16 +8,15 @@ import PostViewer from "./pages/post-viewer";
 import Profile from "./pages/profile";
 import Settings from "./components/settings";
 import ProtectedRoute from "./layout/ProtectedRoute";
-import { useUser } from "./context/UserContext";
 import AdminPanel from "./pages/admin-panel";
 import NotFoundError from "./pages/404";
 import { Loader, Loader2 } from "lucide-react";
+import { useCurrentLoggedInUser } from "./hooks/useCurrentLoggedInUser";
 
 function App() {
-  const { user, isLoading } = useUser();
+  const { user, isLoading } = useCurrentLoggedInUser();
 
-  console.log("App component rendered", user);
-
+  
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-4 h-[80vh]">
@@ -25,6 +24,7 @@ function App() {
       </div>
     );
   }
+  console.log("App component rendered", user);
 
   return (
     <Suspense fallback={<p>Loading...</p>}>

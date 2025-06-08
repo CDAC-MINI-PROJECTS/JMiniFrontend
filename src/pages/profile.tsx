@@ -89,39 +89,10 @@ import { FaGoogleDrive } from "react-icons/fa";
 import NotFoundError from "./404";
 import API from "@/lib/api";
 import axios from "axios";
-import { useUser } from "@/context/UserContext";
 import { useGoogleDriveAPI } from "@/hooks/useGoogleDriveAPI";
 import FollowingDetailsDrawer from "@/components/ui/FollowingDetailsDrawer";
 import { transformFollowerData } from "@/lib/utils";
-
-interface UserDetails {
-  userId: string;
-  username: string;
-  name: string;
-  profile: string;
-  verified: boolean;
-  followers: string[];
-  followings: string[];
-  bio: string;
-  location: string;
-  website: string[];
-  occupation: string[];
-  birthday: string;
-  joinDate: string;
-  contactEmail: string;
-  email: string;
-  phone: string | null;
-  cover: string;
-  posts: any[];
-  reposts: any[];
-  taggedPosts: any[];
-  favors: any[];
-  profilePictureUrl: string;
-  coverPictureUrl: string;
-  createdAt: string;
-  updatedAt: string;
-  _id: string;
-}
+import { SocialMediaButtons } from "@/components/social-media.buttons";
 
 export default function AccountProfile({ user }) {
   const { toast } = useToast();
@@ -182,23 +153,37 @@ export default function AccountProfile({ user }) {
   const fetchData = async () => {
     try {
       const response = await API.get(`/users/${id}`);
-
       if (response?.data) {
         const {
+          userId,
+          username,
+          firstName,
+          lastName,
+          dob,
           profile,
           cover,
+          gender,
+          maritalStatus,
+          bloodGroup,
+          country,
+          state,
+          city,
+          addressLine1,
+          addressLine2,
+          zipCode,
+          phoneNumber,
+          secondaryEmail,
+          isEmailVerified,
           bio,
-          firstName: name,
-          username,
-          email,
-          phone,
-          verified,
-          location,
-          website,
-          occupation,
-          dob: birthday,
-          createdAt: joinDate,
-          userId,
+          language,
+          role,
+          isActive,
+          lastLogin,
+          instagramURL,
+          twitterURL,
+          facebookURL,
+          linkedinURL,
+          createdAt,
         } = response?.data;
         setProfile(profile);
         setCover(cover);
@@ -224,6 +209,7 @@ export default function AccountProfile({ user }) {
   const fetchPost = async (userId: number) => {
     try {
       const response = await API.get(`/dreams/user/${userId}`);
+
       if (response.data) {
         setPosts(response.data);
         setIsPostsLoading(false);
@@ -324,7 +310,7 @@ export default function AccountProfile({ user }) {
 
       console.log("Updated Profile:", updatedProfile);
 
-      await API.put(`/users/${currentUsername}`, updatedProfile);
+      await API.put(`/users/${user_id}`, updatedProfile);
       await fetchData();
       toast({ title: "Profile updated successfully" });
     } catch (error) {
@@ -350,11 +336,11 @@ export default function AccountProfile({ user }) {
     console.log("isFollwer");
 
     const follower = await API.get(`/follows/followers/${followingId}`);
-    let tranformData = transformFollowerData(follower.data, 'follower');
+    let tranformData = transformFollowerData(follower.data, "follower");
     setFollowerDetails(tranformData.connections);
     setFollowers(follower.data);
     const following = await API.get(`/follows/following/${followingId}`);
-    let tranformData1 = transformFollowerData(following.data, 'following');
+    let tranformData1 = transformFollowerData(following.data, "following");
     setFollowingDetails(tranformData1.connections);
     setFollowings(following.data);
 
@@ -525,6 +511,31 @@ export default function AccountProfile({ user }) {
             </div>
 
             <div className="hidden lg:flex items-end gap-2">
+              <SocialMediaButtons
+                links={[
+                  { platform: "twitter", url: "https://twitter.com/username" },
+                  {
+                    platform: "facebook",
+                    url: "https://facebook.com/username",
+                  },
+                  {
+                    platform: "instagram",
+                    url: "https://instagram.com/username",
+                  },
+                  {
+                    platform: "linkedin",
+                    url: "https://linkedin.com/in/username",
+                  },
+                  { platform: "github", url: "https://github.com/username" },
+                  { platform: "youtube", url: "https://youtube.com/@username" },
+                  { platform: "email", url: "mailto:contact@example.com" },
+                  {
+                    platform: "website",
+                    url: "https://example.com",
+                    label: "Portfolio",
+                  },
+                ]}
+              />
               {username != undefined ? (
                 isBtnLoading ? (
                   <Button className="gap-2" disabled>
@@ -929,7 +940,7 @@ export default function AccountProfile({ user }) {
                   <DialogTitle>Details</DialogTitle>
                 </DialogHeader>
                 <ul className="space-y-2">
-                  {((country && state) || city) && (
+                  {true && (
                     <li className="flex items-center">
                       <div className="flex-shrink-0">
                         <MapPin className="w-4 h-4 mr-2" />
@@ -1190,7 +1201,7 @@ export default function AccountProfile({ user }) {
                       key={index}
                       currentUserID={currentUserID}
                       currentUsername={currentUsername}
-                      id={post.$id}
+                      id={post.dreamId}
                       user_id={post.user.user_id}
                       name={post.user.firstName}
                       username={post.user.username}
@@ -1204,7 +1215,7 @@ export default function AccountProfile({ user }) {
                       hashtags={post.hashtags}
                       tagged_people={post.tagged_people}
                       likes={post.likes}
-                      comments={post.comment}
+                      comments={post?.comments}
                       reposts={post.reposts}
                       {...post}
                     />
