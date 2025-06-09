@@ -1,31 +1,70 @@
-import { Link } from 'react-router-dom';
-import { Search, CircleUser, Settings, UserCheck, Star, Bookmark, BadgeCheck, Trash2, LogOut } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useState } from 'react';
-import { useScrollDirection } from '@/hooks/useScrollDirection';
-import { useNavigate } from 'react-router-dom';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Link } from "react-router-dom";
+import {
+  Search,
+  CircleUser,
+  Settings,
+  UserCheck,
+  Star,
+  Bookmark,
+  BadgeCheck,
+  Trash2,
+  LogOut,
+  User2Icon,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from "react";
+import { useScrollDirection } from "@/hooks/useScrollDirection";
+import { useNavigate } from "react-router-dom";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useCurrentLoggedInUser } from "@/hooks/useCurrentLoggedInUser";
 
 interface HeaderInfo {
-  activeTab: string,
-  username: string,
-  name: string,
-  profile: string,
-  verified: boolean
+  activeTab: string;
+  username: string;
+  name: string;
+  profile: string;
+  verified: boolean;
 }
 
-export default function Header({ activeTab="followings", username, name, profile, verified=false }: HeaderInfo) {
+export default function Header({
+  activeTab = "followings",
+  username,
+  name,
+  profile,
+  verified = false,
+}: HeaderInfo) {
+  const {user: {role}}  =useCurrentLoggedInUser();
   const navigate = useNavigate();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const scrollDirection = useScrollDirection();
   const [searchHistory, setSearchHistory] = useState(() => {
-    return JSON.parse(localStorage.getItem('recentSearches') || '[]');
+    return JSON.parse(localStorage.getItem("recentSearches") || "[]");
   });
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -33,9 +72,14 @@ export default function Header({ activeTab="followings", username, name, profile
     e.preventDefault();
     if (searchQuery.trim()) {
       // Store in localStorage
-      const storedSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
-      const updatedSearches = [searchQuery.trim(), ...storedSearches.filter(s => s !== searchQuery.trim())].slice(0, 5);
-      localStorage.setItem('recentSearches', JSON.stringify(updatedSearches));
+      const storedSearches = JSON.parse(
+        localStorage.getItem("recentSearches") || "[]"
+      );
+      const updatedSearches = [
+        searchQuery.trim(),
+        ...storedSearches.filter((s) => s !== searchQuery.trim()),
+      ].slice(0, 5);
+      localStorage.setItem("recentSearches", JSON.stringify(updatedSearches));
 
       setIsSearchOpen(false);
       navigate(`/search/${encodeURIComponent(searchQuery.trim())}`);
@@ -45,52 +89,63 @@ export default function Header({ activeTab="followings", username, name, profile
   };
 
   const signout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('isAuthenticated')
-    navigate('/sign-in');
+    localStorage.removeItem("token");
+    localStorage.removeItem("isAuthenticated");
+    navigate("/sign-in");
     return;
-  }
+  };
 
   return (
     <header
       className={`sticky transition-all duration-300 ${
-        scrollDirection === 'down' &&
-        window.matchMedia('(max-width: 767px)').matches
-          ? '-top-20'
-          : 'top-0'
+        scrollDirection === "down" &&
+        window.matchMedia("(max-width: 767px)").matches
+          ? "-top-20"
+          : "top-0"
       } z-10 navbar border-b border-border`}
     >
       <div className="container mx-auto px-4 py-3 flex flex-col lg:flex-row items-center justify-between">
         <div className="flex items-center justify-between w-full lg:w-auto">
-          <div className='hidden lg:block'>
+          <div className="hidden lg:block">
             <Link to="/" className="flex items-center space-x-2">
               {/* <img src="/logo.png" alt="DreamsDoc Logo" width={24} height={24} /> */}
               <span className="text-xl font-bold brand">DreamsDoc</span>
             </Link>
           </div>
-          { activeTab === "#" ? (
-            <div className='block lg:hidden'>
-            <Link to="/" className="flex items-center space-x-2">
-              {/* <img src="/logo.png" alt="DreamsDoc Logo" width={24} height={24} /> */}
-              <span className="text-xl font-bold brand">DreamsDoc</span>
-            </Link>
-          </div>
+          {activeTab === "#" ? (
+            <div className="block lg:hidden">
+              <Link to="/" className="flex items-center space-x-2">
+                {/* <img src="/logo.png" alt="DreamsDoc Logo" width={24} height={24} /> */}
+                <span className="text-xl font-bold brand">DreamsDoc</span>
+              </Link>
+            </div>
           ) : (
-            <div className='flex items-center lg:hidden'>
+            <div className="flex items-center lg:hidden">
               {/* <img src="/logo.png" alt="DreamsDoc Logo" width={24} height={24} /> */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="link" className="ring-0 border-0 focus-visible:ring-offset-0 focus-visible:ring-0 text-foreground">
-                    <span className="text-xl font-bold brand text-foreground">DreamsDoc</span>
+                  <Button
+                    variant="link"
+                    className="ring-0 border-0 focus-visible:ring-offset-0 focus-visible:ring-0 text-foreground"
+                  >
+                    <span className="text-xl font-bold brand text-foreground">
+                      DreamsDoc
+                    </span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 mt-2" align='start'>
+                <DropdownMenuContent className="w-56 mt-2" align="start">
                   <DropdownMenuRadioGroup value={activeTab}>
-                    <DropdownMenuRadioItem value="followings" onClick={() => navigate('/')}>
+                    <DropdownMenuRadioItem
+                      value="followings"
+                      onClick={() => navigate("/")}
+                    >
                       <UserCheck className="h-4 w-4" />
                       &nbsp;&nbsp;Followings
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="favorites" onClick={() => navigate('/favorites')}>
+                    <DropdownMenuRadioItem
+                      value="favorites"
+                      onClick={() => navigate("/favorites")}
+                    >
                       <Star className="h-4 w-4" />
                       &nbsp;&nbsp;Favorites
                     </DropdownMenuRadioItem>
@@ -99,14 +154,12 @@ export default function Header({ activeTab="followings", username, name, profile
               </DropdownMenu>
             </div>
           )}
-          { username == undefined ? (
+          {username == undefined ? (
             <div className="flex items-center lg:hidden gap-2">
-              <Link to='/sign-in'>
-                <Button variant="outline">
-                  Sign in
-                </Button>
+              <Link to="/sign-in">
+                <Button variant="outline">Sign in</Button>
               </Link>
-              <Link to='/sign-up'>
+              <Link to="/sign-up">
                 <Button>Sign up</Button>
               </Link>
             </div>
@@ -126,16 +179,18 @@ export default function Header({ activeTab="followings", username, name, profile
                   </DialogHeader>
                   <form onSubmit={handleSearch} className="relative mt-4">
                     <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                    <Input 
-                      className="pl-8 w-full text-md" 
-                      placeholder="Search" 
+                    <Input
+                      className="pl-8 w-full text-md"
+                      placeholder="Search"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
                   </form>
                   <div className="mt-4">
-                    <div className='flex justify-between items-center mb-2'>
-                      <h4 className="mb-2 text-sm font-medium">Recent Searches</h4>
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="mb-2 text-sm font-medium">
+                        Recent Searches
+                      </h4>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -145,19 +200,25 @@ export default function Header({ activeTab="followings", username, name, profile
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
-                  <ScrollArea className="h-[200px]">
-                    <ul className="space-y-2">
-                      {searchHistory.map((item, index) => (
-                        <li key={index} className="flex items-center justify-between">
-                          <Button variant="ghost" className="w-full justify-start text-sm">
-                            <Search className="mr-2 h-4 w-4" />
-                            {item}
-                          </Button>
-                        </li>
-                      ))}
-                    </ul>
-                  </ScrollArea>
-                </div>
+                    <ScrollArea className="h-[200px]">
+                      <ul className="space-y-2">
+                        {searchHistory.map((item, index) => (
+                          <li
+                            key={index}
+                            className="flex items-center justify-between"
+                          >
+                            <Button
+                              variant="ghost"
+                              className="w-full justify-start text-sm"
+                            >
+                              <Search className="mr-2 h-4 w-4" />
+                              {item}
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    </ScrollArea>
+                  </div>
                 </DialogContent>
               </Dialog>
               {/* Mobile Profile Dropdown */}
@@ -165,7 +226,11 @@ export default function Header({ activeTab="followings", username, name, profile
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={profile} alt="User" className='object-cover object-center'/>
+                      <AvatarImage
+                        src={profile}
+                        alt="User"
+                        className="object-cover object-center"
+                      />
                       <AvatarFallback>M</AvatarFallback>
                     </Avatar>
                   </Button>
@@ -173,11 +238,22 @@ export default function Header({ activeTab="followings", username, name, profile
                 <DropdownMenuContent className="w-56 mt-2" align="end">
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <div className='flex items-center'>
+                      <div className="flex items-center">
                         <p className="text-sm font-medium">{name}</p>
-                        {verified && <TooltipProvider><Tooltip><TooltipTrigger><BadgeCheck className="h-4 w-4 text-blue-500 ml-1" /></TooltipTrigger><TooltipContent>Verified</TooltipContent></Tooltip></TooltipProvider>}
+                        {verified && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <BadgeCheck className="h-4 w-4 text-blue-500 ml-1" />
+                              </TooltipTrigger>
+                              <TooltipContent>Verified</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
                       </div>
-                      <p className="text-xs text-muted-foreground">@{username}</p>
+                      <p className="text-xs text-muted-foreground">
+                        @{username}
+                      </p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -194,7 +270,10 @@ export default function Header({ activeTab="followings", username, name, profile
                     <span>Settings</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className='text-red-500 focus:text-red-600' onClick={signout}>
+                  <DropdownMenuItem
+                    className="text-red-500 focus:text-red-600"
+                    onClick={signout}
+                  >
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign out
                   </DropdownMenuItem>
@@ -205,7 +284,7 @@ export default function Header({ activeTab="followings", username, name, profile
         </div>
 
         {/* Tabs (Desktop View) */}
-        { activeTab !== "#" && username != undefined && (
+        {/* { activeTab !== "#" && username != undefined && (
           <Tabs defaultValue={activeTab} className="hidden lg:block w-[400px]">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="followings" onClick={() => navigate('/')}>
@@ -218,17 +297,15 @@ export default function Header({ activeTab="followings", username, name, profile
               </TabsTrigger>
             </TabsList>
           </Tabs>
-        )}
+        )} */}
 
         {/* Desktop Search and Profile */}
-        { username == undefined ? (
+        {username == undefined ? (
           <div className="hidden lg:flex items-center gap-4">
-            <Link to='/sign-in'>
-              <Button variant="outline">
-                Sign in
-              </Button>
+            <Link to="/sign-in">
+              <Button variant="outline">Sign in</Button>
             </Link>
-            <Link to='/sign-up'>
+            <Link to="/sign-up">
               <Button>Sign up</Button>
             </Link>
           </div>
@@ -248,16 +325,18 @@ export default function Header({ activeTab="followings", username, name, profile
                 </DialogHeader>
                 <form onSubmit={handleSearch} className="relative mt-4">
                   <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input 
-                    className="pl-8 w-full text-md" 
-                    placeholder="Search" 
+                  <Input
+                    className="pl-8 w-full text-md"
+                    placeholder="Search"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </form>
                 <div className="mt-4">
-                  <div className='flex justify-between items-center mb-2'>
-                    <h4 className="mb-2 text-sm font-medium">Recent Searches</h4>
+                  <div className="flex justify-between items-center mb-2">
+                    <h4 className="mb-2 text-sm font-medium">
+                      Recent Searches
+                    </h4>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -270,8 +349,14 @@ export default function Header({ activeTab="followings", username, name, profile
                   <ScrollArea className="h-[200px]">
                     <ul className="space-y-2">
                       {searchHistory.map((item, index) => (
-                        <li key={index} className="flex items-center justify-between">
-                          <Button variant="ghost" className="w-full justify-start text-sm">
+                        <li
+                          key={index}
+                          className="flex items-center justify-between"
+                        >
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start text-sm"
+                          >
                             <Search className="mr-2 h-4 w-4" />
                             {item}
                           </Button>
@@ -287,17 +372,30 @@ export default function Header({ activeTab="followings", username, name, profile
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={profile} alt="User" className='object-cover object-center' />
+                    <AvatarImage
+                      src={profile}
+                      alt="User"
+                      className="object-cover object-center"
+                    />
                     <AvatarFallback>M</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 mt-[30rem]" >
+              <DropdownMenuContent className="w-56 mt-[30rem]">
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <div className="flex items-center">
                       <p className="font-medium">{name}</p>
-                      {verified && <TooltipProvider><Tooltip><TooltipTrigger><BadgeCheck className="h-4 w-4 text-blue-500 ml-1" /></TooltipTrigger><TooltipContent>Verified</TooltipContent></Tooltip></TooltipProvider>}
+                      {verified && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <BadgeCheck className="h-4 w-4 text-blue-500 ml-1" />
+                            </TooltipTrigger>
+                            <TooltipContent>Verified</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
                     </div>
                     <p className="text-xs text-muted-foreground">@{username}</p>
                   </div>
@@ -312,16 +410,31 @@ export default function Header({ activeTab="followings", username, name, profile
                   <span>Bookmarks</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate(`/settings`)}>
-                  <Settings className="mr-2 h-4 w-4"/>
+                  <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className='text-red-500 focus:text-red-600' onClick={signout}>
+                <DropdownMenuItem
+                  className="text-red-500 focus:text-red-600"
+                  onClick={signout}
+                >
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {
+              role === 'ROLE_ADMIN' &&
+              <Button
+                onClick={() => {
+                  navigate("/admin");
+                }}
+              >
+                <User2Icon />
+                Admin
+              </Button>
+            }
           </div>
         )}
       </div>

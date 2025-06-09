@@ -102,12 +102,11 @@ export default function PostDrawer({ user_id, username, name, profile, verified}
     }
      
     const response = await API.post('/dreams', {
+       userId: user?.userId,
        content: caption,
        tags: tag,
        title: title,
        visibility: 'public',
-       userId: user?.userId
-       // TODO: add file links if available
     });
 
     if (response.status === 200) {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -22,6 +22,9 @@ import {
   BarChart3,
   Moon,
 } from "lucide-react"
+import API from "@/lib/api"
+import { formatDate } from "date-fns"
+import { getRelativeTime } from "@/lib/utils"
 
 interface User {
   id: string
@@ -57,76 +60,100 @@ interface Comment {
 
 export default function AdminPanel() {
   const [searchTerm, setSearchTerm] = useState("")
-
+  const [users, setUsers] = useState([]);
+  const [dreams,setDreams] =useState([]);
   // Mock data
-  const users: User[] = [
-    {
-      id: "1",
-      name: "Luna Martinez",
-      email: "luna@example.com",
-      avatar: "/placeholder.svg?height=32&width=32",
-      joinDate: "2024-01-15",
-      status: "active",
-      dreamsCount: 24,
-      likesReceived: 156,
-    },
-    {
-      id: "2",
-      name: "Marcus Chen",
-      email: "marcus@example.com",
-      avatar: "/placeholder.svg?height=32&width=32",
-      joinDate: "2024-02-20",
-      status: "active",
-      dreamsCount: 18,
-      likesReceived: 89,
-    },
-    {
-      id: "3",
-      name: "Zoe Thompson",
-      email: "zoe@example.com",
-      avatar: "/placeholder.svg?height=32&width=32",
-      joinDate: "2024-03-10",
-      status: "suspended",
-      dreamsCount: 12,
-      likesReceived: 45,
-    },
-  ]
+  // const users: User[] = [
+  //   {
+  //     id: "1",
+  //     name: "Luna Martinez",
+  //     email: "luna@example.com",
+  //     avatar: "/placeholder.svg?height=32&width=32",
+  //     joinDate: "2024-01-15",
+  //     status: "active",
+  //     dreamsCount: 24,
+  //     likesReceived: 156,
+  //   },
+  //   {
+  //     id: "2",
+  //     name: "Marcus Chen",
+  //     email: "marcus@example.com",
+  //     avatar: "/placeholder.svg?height=32&width=32",
+  //     joinDate: "2024-02-20",
+  //     status: "active",
+  //     dreamsCount: 18,
+  //     likesReceived: 89,
+  //   },
+  //   {
+  //     id: "3",
+  //     name: "Zoe Thompson",
+  //     email: "zoe@example.com",
+  //     avatar: "/placeholder.svg?height=32&width=32",
+  //     joinDate: "2024-03-10",
+  //     status: "suspended",
+  //     dreamsCount: 12,
+  //     likesReceived: 45,
+  //   },
+  // ]
 
-  const dreams: Dream[] = [
-    {
-      id: "1",
-      title: "Flying Through Neon Cities",
-      author: "Luna Martinez",
-      category: "Lucid",
-      likes: 24,
-      dislikes: 2,
-      comments: 5,
-      status: "approved",
-      createdAt: "2024-03-15",
-    },
-    {
-      id: "2",
-      title: "Talking to My Childhood Pet",
-      author: "Marcus Chen",
-      category: "Emotional",
-      likes: 18,
-      dislikes: 0,
-      comments: 8,
-      status: "approved",
-      createdAt: "2024-03-14",
-    },
-    {
-      id: "3",
-      title: "Inappropriate Content Dream",
-      author: "Anonymous User",
-      category: "Normal",
-      likes: 2,
-      dislikes: 15,
-      comments: 3,
-      status: "flagged",
-      createdAt: "2024-03-13",
-    },
-  ]
+  useEffect(()=>{
+    const fetchAllusers = async () =>{
+       const response  = await API.get('/users');
+      if(response.data.content){
+        setUsers(response.data.content);
+      }
+    };
+    
+    fetchAllusers();
+  },[])
+
+  useEffect(()=>{
+    const fetchAllDreams = async () =>{
+       const response  = await API.get('/dreams');
+      if(response.data){
+        setDreams(response.data);
+      }
+    };
+    
+    fetchAllDreams();
+  },[])
+  
+
+  // const dreams: Dream[] = [
+  //   {
+  //     id: "1",
+  //     title: "Flying Through Neon Cities",
+  //     author: "Luna Martinez",
+  //     category: "Lucid",
+  //     likes: 24,
+  //     dislikes: 2,
+  //     comments: 5,
+  //     status: "approved",
+  //     createdAt: "2024-03-15",
+  //   },
+  //   {
+  //     id: "2",
+  //     title: "Talking to My Childhood Pet",
+  //     author: "Marcus Chen",
+  //     category: "Emotional",
+  //     likes: 18,
+  //     dislikes: 0,
+  //     comments: 8,
+  //     status: "approved",
+  //     createdAt: "2024-03-14",
+  //   },
+  //   {
+  //     id: "3",
+  //     title: "Inappropriate Content Dream",
+  //     author: "Anonymous User",
+  //     category: "Normal",
+  //     likes: 2,
+  //     dislikes: 15,
+  //     comments: 3,
+  //     status: "flagged",
+  //     createdAt: "2024-03-13",
+  //   },
+  // ]
 
   const comments: Comment[] = [
     {
@@ -205,7 +232,7 @@ export default function AdminPanel() {
               <Users className="h-4 w-4 text-pink-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">1,234</div>
+              <div className="text-2xl font-bold">{users.length}</div>
               <p className="text-xs text-muted-foreground">+12% from last month</p>
             </CardContent>
           </Card>
@@ -215,7 +242,7 @@ export default function AdminPanel() {
               <MessageSquare className="h-4 w-4 text-purple-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">5,678</div>
+              <div className="text-2xl font-bold">{dreams.length}</div>
               <p className="text-xs text-muted-foreground">+8% from last month</p>
             </CardContent>
           </Card>
@@ -336,24 +363,22 @@ export default function AdminPanel() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users.map((user) => (
+                    {users?.map((user) => (
                       <TableRow key={user.id}>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Avatar className="h-8 w-8">
-                              <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
+                              <AvatarImage src={user?.profile || "/placeholder.svg"} alt={user?.name} />
                               <AvatarFallback>
-                                {user.name
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")}
+                                {user.firstName?.split("")[0]}{user.lastName?.split("")[0]}
                               </AvatarFallback>
                             </Avatar>
-                            <span className="font-medium">{user.name}</span>
+                            <span className="font-medium">{user.firstName}{" "}{user.lastName}
+</span>
                           </div>
                         </TableCell>
                         <TableCell>{user.email}</TableCell>
-                        <TableCell>{user.joinDate}</TableCell>
+                        <TableCell>{user.createdAt.split("T")[0] +" "+getRelativeTime(user.createdAt)}</TableCell>
                         <TableCell>{user.dreamsCount}</TableCell>
                         <TableCell>{user.likesReceived}</TableCell>
                         <TableCell>{getStatusBadge(user.status)}</TableCell>

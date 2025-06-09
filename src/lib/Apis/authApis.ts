@@ -21,7 +21,7 @@ export const authApis = {
       });
       return data;
     } catch (error) {
-      throw new Error("Failed to sign up: " + error.message);
+      throw new Error("Failed to sign up: " + error?.response?.data ? error?.response?.data : error);
     }
   },
   getCurrentUser: async () => {

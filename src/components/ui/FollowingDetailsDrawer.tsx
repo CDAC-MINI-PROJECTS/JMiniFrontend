@@ -41,7 +41,7 @@ const FollowingDetailsDrawer = ({
           </DrawerHeader>
 
           <ScrollArea className="overflow-y-auto">
-            <div className="p-4 space-y-4">
+            <div className="p-4 space-y-4" key={users[0]?.user_id}>
               {users.length === 0 ? (
                 <p className="text-center text-muted-foreground">No data available</p>
               ) : (

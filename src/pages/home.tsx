@@ -15,7 +15,7 @@ import BottomNav from "@/components/bottom-nav";
 import API from "@/lib/api";
 
 export default function Home({
-    user: { userId = 0, username, firstName, profile, isVerified = false },
+      user: { userId, username, firstName, profile, isVerified = false },
   } ) {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -136,7 +136,9 @@ export default function Home({
                 </div>
               </div>
             ) : (
-              posts.map((post, index) => (
+              posts.map((post, index) => { 
+                console.log('post============',post)
+                return (
                 <Post
                   key={index}
                   title={post.title}
@@ -159,15 +161,15 @@ export default function Home({
                   comments={post.comment}
                   reposts={post.reposts}
                   deletePost={deletePost}
+                  reactions={post.reactions}
                   {...post}
                 />
-              ))
+              )})
             )}
           </main>
           <aside className="hidden lg:block w-1/4 sticky top-20 self-start">
             <div className="space-y-6">
-              <Trendings />
-              <FollowSuggestions />
+              <FollowSuggestions userId={userId}/>
               <p className="pl-4 text-sm text-muted-foreground">
                 2025 DreamsDoc © TeamCdac <br />
                 <a href="https://www.cdac.com" target="_blank">

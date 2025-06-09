@@ -110,9 +110,8 @@ export default function AccountProfile({ user }) {
   const [currentVerified, setCurrentVerified] = useState(false);
   const [currentFollowings, setCurrentFollowings] = useState([]);
   const [currentFavorites, setCurrentFavorites] = useState([]);
-  const [user_id, setUserID] = useState("");
+  const [user_id, setUserID] = useState(0);
   const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState(null);
   const [name, setName] = useState("");
   const [profile, setProfile] = useState("");
@@ -122,9 +121,8 @@ export default function AccountProfile({ user }) {
   const [joinDate, setJoinDate] = useState("");
   const [followers, setFollowers] = useState([]);
   const [followings, setFollowings] = useState([]);
-  const [favors, setFavors] = useState([]);
   const [location, setLocation] = useState("");
-  const [website, setWebsite]: any[] = useState([]);
+  // const [favors, setFavors] = useState([]);
   const [contactEmail, setContactEmail] = useState("");
   const [occupation, setOccupation] = useState([]);
   const [birthday, setBirthday] = useState("");
@@ -141,7 +139,6 @@ export default function AccountProfile({ user }) {
   const [isDrawerOpen2, setIsDrawerOpen2] = useState(false);
   const [repostUserDetails, setRepostUserDetails] = useState({});
   const [tagUserDetails, setTagUserDetails] = useState({});
-
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [country, setCountry] = useState("");
@@ -149,6 +146,11 @@ export default function AccountProfile({ user }) {
   const [city, setCity] = useState("");
   const [zip, setZip] = useState("");
   const [address, setAddress] = useState("");
+  const [linkedinURL, setLinkedinURL] = useState("");
+  const [instagramURL, setInstagramURL] = useState("");
+  const [facebookURL, setFacebookURL] = useState("");
+
+  const [twitterURL, setTwitterURL] = useState("");
 
   const fetchData = async () => {
     try {
@@ -162,42 +164,43 @@ export default function AccountProfile({ user }) {
           dob,
           profile,
           cover,
-          gender,
-          maritalStatus,
-          bloodGroup,
           country,
           state,
           city,
-          addressLine1,
-          addressLine2,
-          zipCode,
           phoneNumber,
-          secondaryEmail,
-          isEmailVerified,
           bio,
-          language,
           role,
-          isActive,
           lastLogin,
           instagramURL,
           twitterURL,
           facebookURL,
           linkedinURL,
           createdAt,
+          email
         } = response?.data;
+
+      
+        setFirstName(firstName);
+        setLastName(lastName);
+        setCity(city)
+        setCountry(country);
+        setState(state);
         setProfile(profile);
         setCover(cover);
         setBio(bio || "");
-        setName(name || "");
+        setBirthday(dob);
+        setLinkedinURL(linkedinURL);
+        setInstagramURL(instagramURL);
+        setTwitterURL(twitterURL);
+        setFacebookURL(facebookURL);
+        setName(`${firstName} ${lastName ?lastName: "" }`);
         setUsername(username || "");
-        setEmail(email || "");
-        setPhone(phone || null);
+        setContactEmail(email || "");
+        setPhone(phoneNumber || null);
         setVerified(verified || false);
         setLocation(location || "");
-        setWebsite(website || []);
         setOccupation(occupation || []);
         setUserID(userId);
-        console.log(user.userId, "user.userId");
         getFollower(user.userId, userId);
       }
       setIsBtnLoading(false);
@@ -298,14 +301,17 @@ export default function AccountProfile({ user }) {
         firstName: firstName,
         lastName: lastName,
         username: username,
-        email: email,
+        email: contactEmail,
         phone: phone,
         country: country,
         state: state,
         city: city,
         zip: zip,
         address: address,
-        website: website,
+        linkedinURL: linkedinURL === "" ? null : linkedinURL,
+        instagramURL,
+        facebookURL,
+        twitterURL
       };
 
       console.log("Updated Profile:", updatedProfile);
@@ -371,6 +377,9 @@ export default function AccountProfile({ user }) {
   useEffect(() => {
     fetchData();
   }, [id]);
+
+
+
   // Side Effects
   useEffect(() => {
     setCurrentUsername(user?.username);
@@ -387,10 +396,10 @@ export default function AccountProfile({ user }) {
   }, [followed]);
 
   useEffect(() => {
-    if (user?.userId) {
-      fetchPost(user?.userId);
+    if (user_id) {
+      fetchPost(user_id);
     }
-  }, [user?.userId]);
+  }, [user_id]);
 
   // Render Logic
   if (isLoading) {
@@ -450,18 +459,18 @@ export default function AccountProfile({ user }) {
               <PhotoView
                 src={
                   cover ||
-                  `https://placehold.co/3840x2160/020617/FFFFFF?text=${user?.firstName}`
+                  `https://placehold.co/3840x2160/020617/FFFFFF?text=${firstName}`
                 }
               >
                 <img
                   src={
                     cover ||
-                    `https://placehold.co/3840x2160/020617/FFFFFF?text=${user?.firstName}`
+                    `https://placehold.co/3840x2160/020617/FFFFFF?text=${firstName}`
                   }
                   className="w-full h-48 object-cover lg:h-96 rounded-lg"
                   alt="Cover Image"
                   onError={(e) => {
-                    e.currentTarget.src = `https://placehold.co/3840x2160/020617/FFFFFF?text=${user?.firstName}`;
+                    e.currentTarget.src = `https://placehold.co/3840x2160/020617/FFFFFF?text=${firstName}`;
                   }}
                 />
               </PhotoView>
@@ -471,19 +480,19 @@ export default function AccountProfile({ user }) {
                 <PhotoView
                   src={
                     profile ||
-                    `https://placehold.co/3840x2160/020617/FFFFFF?text=${user?.firstName}`
+                    `https://placehold.co/3840x2160/020617/FFFFFF?text=${firstName}`
                   }
                 >
                   <Avatar className="absolute bottom-0 left-4 transform translate-y-1/2 w-40 h-40 lg:w-30 lg:h-30 border-4 border-background">
                     <AvatarImage
                       src={
                         profile ||
-                        `https://placehold.co/3840x2160/020617/FFFFFF?text=${user?.firstName}`
+                        `https://placehold.co/3840x2160/020617/FFFFFF?text=${firstName}`
                       }
                       alt={name}
                       className="object-cover object-center"
                       onError={(e) => {
-                        e.currentTarget.src = `https://placehold.co/3840x2160/020617/FFFFFF?text=${user?.firstName}`;
+                        e.currentTarget.src = `https://placehold.co/3840x2160/020617/FFFFFF?text=${firstName}`;
                       }}
                     />
                     <AvatarFallback>MM</AvatarFallback>
@@ -773,13 +782,14 @@ export default function AccountProfile({ user }) {
                     </div>
                     <div className="grid gap-2 lg:grid-cols-2 p-2 mr-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="emial">Email</Label>
+                        <Label htmlFor="email">Email</Label>
                         <Input
                           id="emial"
                           name="email"
                           className="text-md"
-                          defaultValue={email}
-                          onChange={(e) => setEmail(e.target.value)}
+                          defaultValue={contactEmail}
+                          onChange={(e) => 
+                            setContactEmail(e.target.value)}
                         />
                       </div>
                       <div className="grid gap-2">
@@ -858,19 +868,43 @@ export default function AccountProfile({ user }) {
                       />
                     </div>
                     <div className="grid gap-2 p-2 mr-4">
-                      <Label htmlFor="website">
-                        Websites (comma-separated)
-                      </Label>
+                      <Label htmlFor="linkedinURL">Linkedin</Label>
                       <Input
-                        id="website"
-                        name="website"
+                        id="linkedinURL"
+                        name="linkedinURL"
                         className="text-md"
-                        defaultValue={website.join(",")}
-                        onChange={(e) =>
-                          setWebsite(
-                            e.target.value.split(",").map((w) => w.trim())
-                          )
-                        }
+                        defaultValue={linkedinURL}
+                        onChange={(e) => setLinkedinURL(e.target.value)}
+                      />
+                    </div>
+                    <div className="grid gap-2 p-2 mr-4">
+                      <Label htmlFor="website">InstagramURL</Label>
+                      <Input
+                        id="instagramURL"
+                        name="instagramURL"
+                        className="text-md"
+                        defaultValue={instagramURL}
+                        onChange={(e) => setInstagramURL(e.target.value)}
+                      />
+                    </div>
+                    <div className="grid gap-2 p-2 mr-4">
+                      <Label htmlFor="FacebookURL">FacebookURL</Label>
+                      <Input
+                        id="FacebookURL"
+                        name="FacebookURL"
+                        className="text-md"
+                        defaultValue={facebookURL}
+                        onChange={(e) => setFacebookURL(e.target.value)}
+                      />
+                    </div>
+                    <div className="grid gap-2 p-2 mr-4">
+                      <Label htmlFor="twitter">TwitterURL</Label>
+                      <Input
+                        id="TwitterURL"
+                        name="TwitterURL"
+                        className="text-md"
+                        defaultValue={twitterURL}
+                        onChange={(e) => setTwitterURL(e.target.value)}
                       />
                     </div>
                     <div className="grid gap-12 lg:grid-cols-2 p-2 mr-4">
@@ -948,28 +982,12 @@ export default function AccountProfile({ user }) {
                       <span className="break-all flex-1">{`${country},${state},${city}`}</span>
                     </li>
                   )}
-                  {website &&
-                    website.map((url, index) => (
-                      <li key={index} className="flex items-center">
-                        <div className="flex-shrink-0">
-                          <LinkIcon className="w-4 h-4 mr-2" />
-                        </div>
-                        <a
-                          href={url.startsWith("http") ? url : `https://${url}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline break-all flex-1"
-                        >
-                          {url}
-                        </a>
-                      </li>
-                    ))}
-                  {email && (
+                  {contactEmail && (
                     <li className="flex items-center">
                       <div className="flex-shrink-0">
                         <Mail className="w-4 h-4 mr-2" />
                       </div>
-                      <span className="break-all flex-1">{email}</span>
+                      <span className="break-all flex-1">{contactEmail}</span>
                     </li>
                   )}
                   {phone && (
@@ -1080,28 +1098,12 @@ export default function AccountProfile({ user }) {
                       <span className="break-all flex-1">{`${country},${state},${city}`}</span>
                     </li>
                   )}
-                  {website &&
-                    website.map((url, index) => (
-                      <li key={index} className="flex items-center">
-                        <div className="flex-shrink-0">
-                          <LinkIcon className="w-4 h-4 mr-2" />
-                        </div>
-                        <a
-                          href={url.startsWith("http") ? url : `https://${url}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline break-all flex-1"
-                        >
-                          {url}
-                        </a>
-                      </li>
-                    ))}
-                  {email && (
+                  {contactEmail && (
                     <li className="flex items-center">
                       <div className="flex-shrink-0">
                         <Mail className="w-4 h-4 mr-2" />
                       </div>
-                      <span className="break-all flex-1">{email}</span>
+                      <span className="break-all flex-1">{contactEmail}</span>
                     </li>
                   )}
                   {phone && (
@@ -1197,12 +1199,13 @@ export default function AccountProfile({ user }) {
                   </div>
                 ) : (
                   posts.map((post, index) => (
+                    <>
                     <Post
                       key={index}
                       currentUserID={currentUserID}
                       currentUsername={currentUsername}
                       id={post.dreamId}
-                      user_id={post.user.user_id}
+                      user_id={post.user.userId}
                       name={post.user.firstName}
                       username={post.user.username}
                       profile={post.user.profile}
@@ -1214,11 +1217,12 @@ export default function AccountProfile({ user }) {
                       location={post.location}
                       hashtags={post.hashtags}
                       tagged_people={post.tagged_people}
-                      likes={post.likes}
+                      likes={post.likeCount}
                       comments={post?.comments}
                       reposts={post.reposts}
                       {...post}
                     />
+                    </>
                   ))
                 )}
               </TabsContent>
@@ -1348,7 +1352,7 @@ export default function AccountProfile({ user }) {
           </main>
           <aside className="hidden lg:block w-1/4 sticky top-20 self-start">
             <div className="space-y-6">
-              <FollowSuggestions />
+              <FollowSuggestions userId={user_id}/>
               <p className="pl-4 text-sm text-muted-foreground">
                 2025 DreamsDoc © TeamCdac <br />
                 <a href="https://www.cdac.com" target="_blank">

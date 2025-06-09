@@ -15,25 +15,10 @@ import { Button } from "@/components/ui/button";
 import API from "@/lib/api";
 import { useCurrentLoggedInUser } from "@/hooks/useCurrentLoggedInUser";
 
-const postsMock = Array.from({ length: 10 }, (_, i) => ({
-  $id: `post-${i + 1}`,
-  $createdAt: new Date(Date.now() - i * 3600000).toISOString(), // i hours ago
-  user_id: `user-${i + 1}`,
-  caption: `This is mock caption number ${i + 1}`,
-  type: i % 2 === 0 ? "image" : "text",
-  files: i % 2 === 0 ? [`/mock/image${i + 1}.jpg`] : [],
-  location: `City ${i + 1}`,
-  hashtags: [`#mock${i + 1}`, `#demo`],
-  tagged_people: [`friend-${i + 1}`, `colleague-${i + 1}`],
-  likes: `"${Math.floor(Math.random() * 100)}"`,
-  comment: `"${Math.floor(Math.random() * 20)}"`,
-  reposts: `"${Math.floor(Math.random() * 10)}"`,
-}));
-
-
 export default function Explore() {
   const { toast } = useToast();
   const { user, isLoading: isLoadingUser} = useCurrentLoggedInUser();
+
   const [isLoading, setIsLoading] = useState(false);
   const [isPostLoading, setIsPostLoading] = useState(true);
   const [user_id, setUserID] = useState("");
@@ -62,13 +47,20 @@ export default function Explore() {
   }, []);
 
   const fetchData = async(isUpdate = false) => {
-       const response  = await API.get('/dreams');
-console.log('ss', response.data)
+      let sortBy = 'dreamId'; 
+      let sortOrder = 'asc';
+     const params = {
+        page: 1,
+        size: 20,
+        sort: `${sortBy},${sortOrder}`,
+      };
+       const response  = await API.get('/dreams', {
+        params
+       });
        setPosts(response.data || []);
   }
-console.log('post', posts)
 
-  if (isLoading) {
+  if (isLoadingUser) {
     return (
       <div className="min-h-screen flex flex-col space-y-4 items-center justify-center">
         <Loader2 className="animate-spin" />
@@ -135,10 +127,10 @@ console.log('post', posts)
                     posts.map((post, index) => (
                       <Post 
                       key={index} 
-                      currentUserID={user_id}
+                      currentUserID={user.userId}
                       currentUsername={username}
                       id={post.dreamId} 
-                      user_id={post.user_id} 
+                      user_id={post.user.userId} 
                       name={post.user.name} 
                       username={post.user.username} 
                       profile={post.user.profile} 
@@ -150,7 +142,7 @@ console.log('post', posts)
                       location={post.location} 
                       hashtags={post.hashtags} 
                       tagged_people={post.tagged_people} 
-                      likes={post.likes} 
+                      likes={post.likeCount} 
                       comments={post.comment} 
                       reposts={post.reposts} 
                       {...post} 
@@ -344,8 +336,7 @@ console.log('post', posts)
           </main>
           <aside className="hidden lg:block w-1/4 sticky top-20 self-start">
             <div className="space-y-6">
-              <Trendings />
-              <FollowSuggestions />
+              <FollowSuggestions userId={user?.userId}/>
               <p className='pl-4 text-sm text-muted-foreground'>2025 DreamsDoc © TeamCdac <br/><a href="https://www.cdac.com" target='_blank'>www.cdac.com</a></p>
             </div>
           </aside>

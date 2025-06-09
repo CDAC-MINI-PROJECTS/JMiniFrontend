@@ -66,6 +66,7 @@ import {
 import { formatCount, getRelativeTime } from "@/lib/utils";
 import API from "@/lib/api";
 import { useCurrentLoggedInUser } from "@/hooks/useCurrentLoggedInUser";
+import { EmojiReactionButton } from "./EmojiReactionButton";
 
 interface PostProps {
   currentUserID: string;
@@ -100,8 +101,24 @@ interface PostProps {
     verified: boolean;
   } | null;
   deletePost;
+  reactions :[{
+    userId: string;
+    type: string;
+    timestamp: string;
+  }]
 }
-
+const mockUsers = [
+  { id: "current-user", name: "You", avatar: "/placeholder.svg?height=32&width=32" },
+  { id: "user-1", name: "Alice Johnson", avatar: "/placeholder.svg?height=32&width=32" },
+  { id: "user-2", name: "Bob Smith", avatar: "/placeholder.svg?height=32&width=32" },
+  { id: "user-3", name: "Carol Davis", avatar: "/placeholder.svg?height=32&width=32" },
+  { id: "user-4", name: "David Wilson", avatar: "/placeholder.svg?height=32&width=32" },
+  { id: "user-5", name: "Emma Brown", avatar: "/placeholder.svg?height=32&width=32" },
+  { id: "user-6", name: "Frank Miller", avatar: "/placeholder.svg?height=32&width=32" },
+  { id: "user-7", name: "Grace Lee", avatar: "/placeholder.svg?height=32&width=32" },
+  { id: "user-8", name: "Henry Taylor", avatar: "/placeholder.svg?height=32&width=32" },
+  { id: "user-9", name: "Ivy Chen", avatar: "/placeholder.svg?height=32&width=32" },
+];
 export default function Post({
   currentUserID,
   currentUsername,
@@ -125,12 +142,14 @@ export default function Post({
   repost_user_data = null,
   tagged_user_data = null,
   deletePost,
+  reactions: reactionsData,
 }: PostProps) {
   const userID = currentUserID;
   const { user: currentUser } = useCurrentLoggedInUser();
 
   // const user = currentUser.body
   const { toast } = useToast();
+  const [commentsData,setCommentsData] = useState(comments)
   const [isLiked, setIsLiked] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [likedUsers, setLikedUsers] = useState([]);
@@ -148,11 +167,84 @@ export default function Post({
   const [showInfoDialog, setShowInfoDialog] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [commentText, setCommentText] = useState("");
-  const [dreamId,setDreamId]  =useState(null);
+  const [dreamId, setDreamId] = useState(null);
+  const [reaction, setReaction] = useState<string | null>(null)
+   const [reactions, setReactions] = useState([
+    {
+      id: "like",
+      emoji: "❤️",
+      label: "Like",
+      icon: null,
+      color: "text-red-500",
+      hoverColor: "hover:text-red-600",
+      users: reactionsData.filter((e)=> e.type == 'like'),
+    },
+    {
+      id: "dislike",
+      emoji: "👎",
+      label: "Dislike",
+      icon: null,
+      color: "text-blue-500",
+      hoverColor: "hover:text-blue-600",
+      users: reactionsData.filter((e)=> e.type == 'dislike'),
+    },
+    {
+      id: "cry",
+      emoji: "😢",
+      label: "Sad",
+      icon: null,
+      color: "text-blue-400",
+      hoverColor: "hover:text-blue-500",
+      users: reactionsData.filter((e)=> e.type == 'cry'),
+    },
+    {
+      id: "best",
+      emoji: "🔥",
+      label: "Fire",
+      icon: null,
+      color: "text-orange-500",
+      hoverColor: "hover:text-orange-600",
+      users: reactionsData.filter((e)=> e.type == 'best'),
+    },
+  ])
+
+  const handleReactionChange = (reactionId: string | null) => {    
+    setReaction(reactionId)
+    const response  = API.put(`/dreams/${id}/reaction`, {
+      userId: currentUserID,
+      reactionType: reactionId,
+    });
+
+    setReactions((prevReactions) => {
+      return prevReactions.map((reaction) => {
+        // Remove current user from all reactions first
+        const usersWithoutCurrent = reaction.users.filter((user) => user.id !== currentUser?.userId)
+      
+        // If this is the selected reaction, add current user
+        if (reaction.id === reactionId) {
+          return {
+            ...reaction,
+            users: [...usersWithoutCurrent, {
+              id: currentUser.userId,
+              name: currentUser.firstName,
+              avatar: "",
+            }],
+          }
+        }
+
+        // Otherwise, just return without current user
+        return {
+          ...reaction,
+          users: usersWithoutCurrent,
+        }
+      })
+    })
+    console.log("Reaction changed to:", reactionId)
+  }
 
   const formatCaption = (text: string) => {
-    console.log('text', text);
-    
+    console.log("text", text);
+
     return text.split(/(\s+)/).map((word, index) => {
       if (word.match(/^(https?:\/\/[^\s]+)/)) {
         return (
@@ -207,11 +299,17 @@ export default function Post({
 
   const handleShowLikes = async () => {};
 
-  const handleLike = async () => {};
+  const handleLike = async () => {
+    const response  = API.put(`/dreams/${id}/reaction`, {
+      userId: currentUserID,
+      reaction,
+    });
+    setIsLiked(true);
+  };
 
   useEffect(() => {
-    // Subscribe to real-time updates for this post's comments
-  }, []);
+     setCommentsData(comments)
+  }, [comments]);
 
   const handleShowComments = async () => {
     setIsCommentDrawerOpen(true);
@@ -247,9 +345,17 @@ export default function Post({
       dreamId: id,
       userId: user_id,
     });
-    setCommentUsers((prev) => [...prev, newComment.data]);
-    setComments((prev) => [...prev,newComment.data]);
-    // setIsCommentDrawerOpen(false)
+    setCommentUsers((prev) => [newComment.data, ...prev]);
+    setComments((prev) => [newComment.data, ...prev]);
+    setCommentsData((prev) => [newComment.data, ...prev]);
+    if (commentRef.current) {
+      commentRef.current.value = "";
+    }
+   
+  };
+
+  const handleCancelComment = () => {
+    setIsCommentDrawerOpen(false);
   };
 
   const handleUserClick = () => {
@@ -285,10 +391,10 @@ export default function Post({
 
   const reportPost = async () => {};
 
-  // useEffect(() => {
-  //   setIsLiked(likes?.length === 0 ? false : likes?.includes(userID));
-  //   setIsReposted(reposts?.length === 0 ? false : reposts?.includes(userID));
-  // }, []);
+  useEffect(() => {
+    setIsLiked(likes?.length === 0 ? false : likes?.includes(userID));
+    // setIsReposted(reposts?.length === 0 ? false : reposts?.includes(userID));
+  }, []);
 
   // Add this function with other handlers
   const handleBookmark = async () => {};
@@ -369,7 +475,7 @@ export default function Post({
                   Show info
                 </DropdownMenuItem>
 
-                {userID === user_id ? (
+                {currentUser.role == "ROLE_ADMIN" || userID === user_id ? (
                   <DropdownMenuItem
                     className="text-red-600 focus:text-red-700"
                     onClick={() => deletePost(id)}
@@ -391,7 +497,7 @@ export default function Post({
           </div>
         </CardHeader>
         <CardContent>
-          <div className="font-extrabold text-2xl">{title}</div>
+          <div className="font-extrabold text-2xl mb-8">{title}</div>
           <p className="mb-2 whitespace-pre-wrap">{caption}</p>
           {files?.length > 1 && type === "post" && (
             <PhotoProvider>
@@ -433,7 +539,7 @@ export default function Post({
         <CardFooter className="pb-4">
           <div className="flex justify-between w-full">
             <div className="flex space-x-2">
-              <TooltipProvider>
+              {/* <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
                     <Button
@@ -450,15 +556,25 @@ export default function Post({
                           isLiked ? "fill-current" : ""
                         }`}
                       />
-                      {/* {formatCount(likes?.length || 0)} */}
+                      {formatCount(likes?.length || 0)}
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>{isLiked ? "Unlike" : "Like"}</p>
                   </TooltipContent>
                 </Tooltip>
-              </TooltipProvider>
-
+              </TooltipProvider> */}
+              <EmojiReactionButton reactions={reactionsData.map((reaction) => ({
+                  id: reaction.type,
+                  emoji: reaction.type, // You might want to replace this with actual emojis based on reaction.type
+                  label: reaction.type, // You might want to replace this with actual labels based on reaction.type
+                  icon: null,
+                  color: "text-gray-500", // Default color
+                  hoverColor: "hover:text-gray-600", // Default hover color
+                  users: [], // Populate users based on your logic if needed
+                }))} 
+                currentUserId={currentUserID} 
+                onReactionChange={handleReactionChange} />
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
@@ -469,7 +585,7 @@ export default function Post({
                       onClick={handleShowComments}
                     >
                       <MessageCircle className="h-4 w-4 mr-1" />
-                      { comments?.length || 0}
+                      {commentsData?.length || 0}
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -599,7 +715,7 @@ export default function Post({
               <DrawerTitle>Likes</DrawerTitle>
               <DrawerDescription>People who liked this post</DrawerDescription>
             </DrawerHeader>
-            <ScrollArea  className="h-[70vh]">
+            <ScrollArea className="h-[70vh]">
               <div className="p-4">
                 {isLoadingUsers ? (
                   <div className="flex items-center justify-center">
@@ -683,7 +799,6 @@ export default function Post({
                   ) : (
                     commentUsers.map((user, index) => {
                       const comment = commentsList[index];
-                     console.log(comment,"------------------------------------")
                       return (
                         <div
                           key={comment?.$id}
@@ -715,7 +830,7 @@ export default function Post({
                                 <BadgeCheck className="h-4 w-4 text-blue-500" />
                               )}
                               <span className="text-md text-muted-foreground">
-                              .
+                                .
                               </span>
                               <span className="text-sm text-muted-foreground">
                                 {getRelativeTime(comment?.createdAt)}
@@ -749,12 +864,15 @@ export default function Post({
                   <span className="text-sm text-muted-foreground">
                     {commentLength}/5000
                   </span>
-                  <Button
-                    onClick={handleComment}
-                    disabled={!commentRef.current?.value.trim()}
-                  >
-                    Comment
-                  </Button>
+                  <div className="flex items-center justify-between gap-3">
+                    <Button
+                      onClick={handleComment}
+                      disabled={!commentRef.current?.value.trim()}
+                    >
+                      Comment
+                    </Button>
+                    <Button onClick={handleCancelComment}>Cancel</Button>
+                  </div>
                 </div>
               </div>
             </DrawerFooter>

@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { useNavigate } from "react-router";
 
-type User = {
+export type User = {
   userId: number;
   username: string;
   email: string;

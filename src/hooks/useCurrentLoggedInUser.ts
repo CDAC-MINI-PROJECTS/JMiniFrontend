@@ -27,9 +27,12 @@ export const useCurrentLoggedInUser = () => {
     const fetchLoggedInUser = async () => {
       try {
         const response = await API.get("/users/me"); // Adjust the endpoint as needed
-        console.log(response.data);
-        setUser(response.data);
+        if(!!response?.data){
+            console.log(response?.data);
+           setUser(response.data);
+        }
       } catch (error) {
+        console.error(error);
         setUser(null);
         localStorage.removeItem("token");
         localStorage.removeItem("isAuthenticated");
@@ -37,7 +40,9 @@ export const useCurrentLoggedInUser = () => {
         setIsLoading(false);
       }
     };
-    fetchLoggedInUser();
+    if(!user.userId){
+        fetchLoggedInUser();
+    }
   }, []);
 
   return {

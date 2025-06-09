@@ -9,6 +9,7 @@ export const SignupVal = z.object({
   email: z.string().email(),
   password: z.string().min(8, { message: "Password must be at least 8 characters." }).max(20, { message: "Password must be less than 20 characters." }),
   role: z.enum(["ROLE_USER", "ROLE_ADMIN"], { message: "Role must be either 'user' or 'admin'." }),
+  key: z.string()
 });
 
 export const SigninVal = z.object({
