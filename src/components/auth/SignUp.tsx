@@ -29,6 +29,9 @@ import {
   SelectValue,
 } from "../ui/select";
 import { ShieldIcon, UserIcon } from "lucide-react";
+
+import { Eye, EyeOff } from "lucide-react";
+
 enum Role {
   ROLE_USER = "ROLE_USER",
   ROLE_ADMIN = "ROLE_ADMIN",
@@ -89,6 +92,7 @@ const SignUp = () => {
   };
 
   const [valError, setValError] = React.useState("");
+  const [showPassword, setShowPassword] = React.useState(false);
 
   return (
     <Form {...form}>
@@ -188,12 +192,26 @@ const SignUp = () => {
                         Password
                       </FormLabel>
                       <FormControl>
-                        <Input
-                          type="password"
-                          className="text-md"
-                          placeholder="••••••••"
-                          {...field}
-                        />
+                        <div className="relative">
+                          <Input
+                            type={showPassword ? "text" : "password"}
+                            className="text-md pr-10"
+                            placeholder="••••••••"
+                            {...field}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword((prev) => !prev)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                            tabIndex={-1}
+                          >
+                            {showPassword ? (
+                              <EyeOff size={18} />
+                            ) : (
+                              <Eye size={18} />
+                            )}
+                          </button>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
